@@ -8,16 +8,6 @@ spring:
 server:
   port: 9021
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:9000/eureka/
-    register-with-eureka: true
-    fetch-registry: true
-  instance:
-    prefer-ip-address: true
-    instance-id: ${spring.application.name}:${server.port}
-
 ---
 
 spring:
@@ -26,3 +16,14 @@ spring:
   config:
     activate:
       on-profile: main
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:9000/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
