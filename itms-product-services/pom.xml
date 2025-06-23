@@ -1,0 +1,43 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.itms</groupId>
+		<artifactId>itms-parent</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../itms-parent</relativePath>
+	</parent>
+
+	<artifactId>itms-product-services</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>ITMS Product Services</name>
+	<description>Aggregates all product-related service modules.</description>
+
+	<modules>
+		<module>ticket-service</module>
+		<module>user-service</module>
+	</modules>
+
+	<dependencyManagement>
+		<dependencies>
+			<!-- Centralized Hibernate Envers version -->
+			<dependency>
+				<groupId>org.hibernate.orm</groupId>
+				<artifactId>hibernate-envers</artifactId>
+				<version>6.5.2.Final</version>
+			</dependency>
+
+			<!-- Optionally centralize other common versions here too -->
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-data-jpa</artifactId>
+				<version>3.3.3</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+</project>
