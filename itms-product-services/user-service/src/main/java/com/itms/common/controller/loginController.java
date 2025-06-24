@@ -15,7 +15,6 @@ import com.itms.core.exception.ContractException;
 import com.itms.core.exception.TechnicalException;
 import com.itms.core.util.EndPointReference;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -26,10 +25,10 @@ public class loginController {
 	@Autowired
 	private LoginService loginService;
 
-	@PostMapping(value = { "/loginWithLoginId", EndPointReference.LOGIN_WITH_LOGIN_ID })
-	public Map<String, Object> loginWithLoginId(@RequestBody EmployeeMaster employeeMaster,
-			HttpServletRequest httpServletRequest) throws TechnicalException, BussinessException, ContractException {
+	@PostMapping(EndPointReference.LOGIN_WITH_LOGIN_ID)
+	public Map<String, Object> loginWithLoginId(@RequestBody EmployeeMaster employeeMaster)
+			throws BussinessException, TechnicalException, ContractException {
 //		log.info(LogUtil.presentationLogger(EndPointReference.LOGIN_WITH_LOGIN_ID));
-		return loginService.authenticateUserWithLoginId(employeeMaster, httpServletRequest);
+		return loginService.loginWithLoginId(employeeMaster);
 	}
 }

@@ -10,4 +10,6 @@ public interface EmployeeMasterRepository extends JpaRepository<EmployeeMaster, 
 
 	public EmployeeMaster findByEmpId(Long empId);
 
+	public EmployeeMaster findByEmpName(String empName);
+
 }

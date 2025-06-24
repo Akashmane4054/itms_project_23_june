@@ -13,7 +13,6 @@ import com.itms.core.exception.BussinessException;
 import com.itms.core.exception.ContractException;
 import com.itms.core.exception.TechnicalException;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -26,8 +25,8 @@ public class LoginServiceImpl implements LoginService {
 	private static final String CLASSNAME = LoginServiceImpl.class.getSimpleName();
 
 	@Override
-	public Map<String, Object> authenticateUserWithLoginId(EmployeeMaster employeeMaster,
-			HttpServletRequest httpServletRequest) throws TechnicalException, BussinessException, ContractException {
+	public Map<String, Object> loginWithLoginId(EmployeeMaster employeeMaster)
+			throws TechnicalException, BussinessException, ContractException {
 
 		Map<String, Object> responseMap = new HashMap<>();
 
