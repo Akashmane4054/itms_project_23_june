@@ -23,7 +23,7 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
 		http.csrf(csrf -> csrf.disable()).authorizeRequests().requestMatchers("/test").authenticated()
-				.requestMatchers("/loginWithLoginId").permitAll().anyRequest().authenticated().and()
+				.requestMatchers("/api/loginWithLoginId").permitAll().anyRequest().authenticated().and()
 				.exceptionHandling(ex -> ex.authenticationEntryPoint(point))
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 		http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
