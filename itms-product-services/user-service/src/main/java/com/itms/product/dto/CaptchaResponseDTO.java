@@ -1,4 +1,4 @@
-package com.itms.common.dto;
+package com.itms.product.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

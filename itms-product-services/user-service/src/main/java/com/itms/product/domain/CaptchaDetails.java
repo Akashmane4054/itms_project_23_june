@@ -1,9 +1,10 @@
-package com.itms.common.domain;
+package com.itms.product.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,25 +14,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "employee_master")
-public class EmployeeMaster {
+@Table(name = "captcha_details")
+public class CaptchaDetails {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long empId;
+	private Long id;
 
-	private String empName;
+	private String uuid;
 
-	private String email;
-	
-	private String password;
+	private String captchaText;
 
-	public String getEmail() {
-		return email;
-	}
+	private Boolean active;
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+	private Boolean isVerified;
 
 }

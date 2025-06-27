@@ -1,4 +1,4 @@
-package com.itms.common;
+package com.itms.product;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -8,9 +8,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
-@ComponentScan(basePackages = { "com.itms.**", "com.itms.core.**", "com.itms.common.**" })
-@EnableJpaRepositories(basePackages = "com.itms.common.repository")
-@EntityScan(basePackages = "com.itms.common.domain")
+@ComponentScan(basePackages = { "com.itms.**", "com.itms.core.**", "com.itms.product.**" })
+@EnableJpaRepositories(basePackages = "com.itms.product.repository")
+@EntityScan(basePackages = "com.itms.product.domain")
 @EnableDiscoveryClient
 public class UserServiceApplication {
 

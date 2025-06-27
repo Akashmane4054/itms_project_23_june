@@ -1,15 +1,8 @@
-package com.itms.common.controller;
+package com.itms.product.controller;
 
-import java.util.Map;
-
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.itms.common.service.CapchaService;
-import com.itms.core.exception.TechnicalException;
-import com.itms.core.util.EndPointReference;
-import com.itms.core.util.LogUtil;
+import com.itms.product.service.CapchaService;
 
 import lombok.extern.slf4j.Slf4j;
 

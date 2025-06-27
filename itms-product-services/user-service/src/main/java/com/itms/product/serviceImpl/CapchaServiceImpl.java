@@ -1,12 +1,12 @@
-package com.itms.common.serviceImpl;
+package com.itms.product.serviceImpl;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.itms.common.repository.CapthaDetailsRepository;
-import com.itms.common.service.CapchaService;
+import com.itms.product.repository.CapthaDetailsRepository;
+import com.itms.product.service.CapchaService;
 
 public class CapchaServiceImpl implements CapchaService {
 

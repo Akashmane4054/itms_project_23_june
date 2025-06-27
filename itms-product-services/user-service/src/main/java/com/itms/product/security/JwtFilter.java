@@ -1,14 +1,14 @@
-package com.itms.common.security;
+package com.itms.product.security;
 
 import java.io.IOException;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import com.itms.product.config.CustomUserDetailsService;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -16,17 +16,14 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 
 @Component
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
+@RequiredArgsConstructor
+public class JwtFilter extends OncePerRequestFilter {
 
-	private final JwtHelper jwtHelper;
-	private final UserDetailsService userDetailsService;
-
-	public JwtAuthenticationFilter(JwtHelper jwtHelper, UserDetailsService userDetailsService) {
-		this.jwtHelper = jwtHelper;
-		this.userDetailsService = userDetailsService;
-	}
+	private final JwtService jwtService;
+	private final CustomUserDetailsService customUserDetailsService;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -43,7 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		token = authHeader.substring(7);
 		try {
-			username = jwtHelper.getUsernameFromToken(token);
+			username = jwtService.extractUsername(token);
 		} catch (IllegalArgumentException e) {
 			logger.info("illegal Argument while fetching the username !");
 			e.printStackTrace();
@@ -59,14 +56,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-			UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-			Boolean validateToken = this.jwtHelper.validateToken(token, userDetails);
-
-			if (validateToken) {
+			UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+			if (jwtService.validateToken(token)) {
 				UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
 						null, userDetails.getAuthorities());
-				authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
 				SecurityContextHolder.getContext().setAuthentication(authToken);
 			}
 		}

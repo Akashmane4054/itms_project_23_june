@@ -1,8 +1,4 @@
-package com.itms.common.service;
-
-import java.util.Map;
-
-import com.itms.core.exception.TechnicalException;
+package com.itms.product.service;
 
 public interface CapchaService {
 
