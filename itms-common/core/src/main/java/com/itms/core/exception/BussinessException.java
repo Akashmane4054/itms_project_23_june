@@ -2,38 +2,24 @@ package com.itms.core.exception;
 
 import org.springframework.http.HttpStatus;
 
-public class BussinessException extends Throwable {
+public class BussinessException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
 	private HttpStatus errorcode;
-
 	private String description;
-
 	private String parameter;
 
 	public BussinessException(HttpStatus errorcode, String description) {
-		super();
+		super(description);
 		this.errorcode = errorcode;
 		this.description = description;
 	}
 
 	public BussinessException(HttpStatus errorcode, String description, String parameter) {
-		super();
-		this.parameter = parameter;
+		super(description);
 		this.errorcode = errorcode;
 		this.description = description;
-	}
-
-	public static long getSerialversionuid() {
-		return serialVersionUID;
-	}
-
-	public String getParameter() {
-		return parameter;
-	}
-
-	public void setParameter(String parameter) {
 		this.parameter = parameter;
 	}
 
@@ -53,4 +39,11 @@ public class BussinessException extends Throwable {
 		this.description = description;
 	}
 
+	public String getParameter() {
+		return parameter;
+	}
+
+	public void setParameter(String parameter) {
+		this.parameter = parameter;
+	}
 }
