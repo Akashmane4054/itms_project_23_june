@@ -41,6 +41,7 @@ public class LoginServiceImpl implements LoginService {
 			throws TechnicalException, BussinessException, ContractException {
 
 		Map<String, Object> responseMap = new HashMap<>();
+		log.info(LogUtil.exitLog(CLASSNAME));
 
 		try {
 			EmployeeMaster employee = employeeMasterRepository.findByEmpId(employeeMasterDto.getEmpId());

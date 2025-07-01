@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CaptchaResponseDTO {
-	private String captchaText;
 	private String captchaImageBase64;
 	private String uuid;
 }
