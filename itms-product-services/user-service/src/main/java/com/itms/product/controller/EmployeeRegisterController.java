@@ -5,7 +5,6 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.itms.core.exception.BussinessException;
@@ -14,24 +13,26 @@ import com.itms.core.exception.TechnicalException;
 import com.itms.core.util.EndPointReference;
 import com.itms.core.util.LogUtil;
 import com.itms.product.dto.EmployeeMasterDTO;
-import com.itms.product.service.LoginService;
+import com.itms.product.service.EmployeeRegisterService;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-//@CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/auth")
-public class loginController {
+public class EmployeeRegisterController {
+
+	// addUser api
+
+	// registerUser api
 
 	@Autowired
-	private LoginService loginService;
+	private EmployeeRegisterService employeeRegisterService;
 
-	@PostMapping(EndPointReference.LOGIN_WITH_LOGIN_ID)
-	public Map<String, Object> loginWithLoginId(@RequestBody EmployeeMasterDTO employeeMasterDto)
+	@PostMapping(EndPointReference.ADD_USER)
+	public Map<String, Object> addUser(@RequestBody EmployeeMasterDTO employeeMasterDto)
 			throws BussinessException, TechnicalException, ContractException {
-		log.info(LogUtil.presentationLogger(EndPointReference.LOGIN_WITH_LOGIN_ID));
-		return loginService.loginWithLoginId(employeeMasterDto);
+		log.info(LogUtil.presentationLogger(EndPointReference.ADD_USER));
+		return employeeRegisterService.addUser(employeeMasterDto);
 	}
 
 }

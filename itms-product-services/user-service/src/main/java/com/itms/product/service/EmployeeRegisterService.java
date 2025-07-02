@@ -7,9 +7,9 @@ import com.itms.core.exception.ContractException;
 import com.itms.core.exception.TechnicalException;
 import com.itms.product.dto.EmployeeMasterDTO;
 
-public interface LoginService {
+public interface EmployeeRegisterService {
 
-	Map<String, Object> loginWithLoginId(EmployeeMasterDTO employeeMasterDto)
+	Map<String, Object> addUser(EmployeeMasterDTO employeeMasterDto)
 			throws BussinessException, TechnicalException, ContractException;
 
 }

@@ -14,7 +14,7 @@ import com.itms.core.exception.TechnicalException;
 import com.itms.core.util.Constants;
 import com.itms.core.util.LogUtil;
 import com.itms.product.domain.EmployeeMaster;
-import com.itms.product.dto.EmployeeMasterDto;
+import com.itms.product.dto.EmployeeMasterDTO;
 import com.itms.product.repository.EmployeeMasterRepository;
 import com.itms.product.service.JwtService;
 import com.itms.product.service.LoginService;
@@ -37,11 +37,11 @@ public class LoginServiceImpl implements LoginService {
 	private static final String CLASSNAME = LoginServiceImpl.class.getSimpleName();
 
 	@Override
-	public Map<String, Object> loginWithLoginId(EmployeeMasterDto employeeMasterDto)
+	public Map<String, Object> loginWithLoginId(EmployeeMasterDTO employeeMasterDto)
 			throws TechnicalException, BussinessException, ContractException {
 
 		Map<String, Object> responseMap = new HashMap<>();
-		log.info(LogUtil.exitLog(CLASSNAME));
+		log.info(LogUtil.startLog(CLASSNAME));
 
 		try {
 			EmployeeMaster employee = employeeMasterRepository.findByEmpId(employeeMasterDto.getEmpId());
