@@ -13,6 +13,7 @@ import com.itms.core.exception.TechnicalException;
 import com.itms.core.util.EndPointReference;
 import com.itms.core.util.LogUtil;
 import com.itms.product.dto.EmployeeMasterDTO;
+import com.itms.product.dto.RegisterMasterDTO;
 import com.itms.product.service.EmployeeRegisterService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,14 @@ public class EmployeeRegisterController {
 			throws BussinessException, TechnicalException, ContractException {
 		log.info(LogUtil.presentationLogger(EndPointReference.ADD_USER));
 		return employeeRegisterService.addUser(employeeMasterDto);
+	}
+	
+	
+	@PostMapping(EndPointReference.REGISTER_USER)
+	public Map<String, Object> registerUser(@RequestBody RegisterMasterDTO registerMasterDTO)
+			throws BussinessException, TechnicalException, ContractException {
+		log.info(LogUtil.presentationLogger(EndPointReference.REGISTER_USER));
+		return employeeRegisterService.registerUser(registerMasterDTO);
 	}
 
 }

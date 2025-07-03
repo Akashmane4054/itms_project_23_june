@@ -81,7 +81,7 @@ public class CapchaServiceImpl implements CapchaService {
 
 		} catch (Exception e) {
 			log.error("Error generating CAPTCHA for portal {}: {}", portalName, LogUtil.errorLog(e));
-			throw new TechnicalException(Constants.TECHNICAL_ERROR, HttpStatus.INTERNAL_SERVER_ERROR,
+			throw new TechnicalException(HttpStatus.INTERNAL_SERVER_ERROR,Constants.TECHNICAL_ERROR,
 					"Failed to generate CAPTCHA");
 		}
 

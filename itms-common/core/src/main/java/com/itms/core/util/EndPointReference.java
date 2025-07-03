@@ -7,6 +7,10 @@ public final class EndPointReference {
 	public static final String CAPTCHA_GENERATE = "captcha_generate";
 	
 	public static final String ADD_USER = "addUser";
+	
+	
+	public static final String REGISTER_USER = "registerUser";
+
 
 
 }

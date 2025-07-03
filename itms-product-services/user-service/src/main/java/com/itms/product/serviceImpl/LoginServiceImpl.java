@@ -67,7 +67,7 @@ public class LoginServiceImpl implements LoginService {
 			throw e;
 		} catch (Exception e) {
 			log.error(LogUtil.errorLog(e));
-			throw new TechnicalException(Constants.TECHNICAL_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new TechnicalException(HttpStatus.INTERNAL_SERVER_ERROR, Constants.TECHNICAL_ERROR);
 		}
 
 		log.info(LogUtil.exitLog(CLASSNAME));
