@@ -40,7 +40,7 @@ public class EmployeeMaster {
 	private Integer empStatus;
 
 	@Column(name = "STATE_CODE")
-	private Integer stateCode;
+	private Long stateCode;
 
 	@Column(name = "BANK_CODE")
 	private Integer bankCode;

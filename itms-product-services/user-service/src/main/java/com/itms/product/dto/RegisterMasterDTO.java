@@ -1,6 +1,7 @@
 package com.itms.product.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import lombok.Data;
 
@@ -26,7 +27,7 @@ public class RegisterMasterDTO {
 	private String state;
 	private String designation;
 	private String project;
-	private String bank;
+	private List<String> bankList;
 	private String alternateNo;
 	private LocalDateTime lastLogin;
 	private String dob;

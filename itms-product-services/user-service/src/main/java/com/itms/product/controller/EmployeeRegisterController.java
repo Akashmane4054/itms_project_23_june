@@ -35,8 +35,7 @@ public class EmployeeRegisterController {
 		log.info(LogUtil.presentationLogger(EndPointReference.ADD_USER));
 		return employeeRegisterService.addUser(employeeMasterDto);
 	}
-	
-	
+
 	@PostMapping(EndPointReference.REGISTER_USER)
 	public Map<String, Object> registerUser(@RequestBody RegisterMasterDTO registerMasterDTO)
 			throws BussinessException, TechnicalException, ContractException {

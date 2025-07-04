@@ -3,7 +3,6 @@ package com.itms.product.serviceImpl;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,17 +86,16 @@ public class employeeRegisterServiceImpl implements EmployeeRegisterService {
 			// Get Module Code for team
 			String moduleCode = String.valueOf(moduleCode(teamName));
 
-			Optional<EmployeeMaster> tlEmployeeOptional = employeeMasterRepository.findById(tlId);
+			EmployeeMaster tlEmployeeOptional = employeeMasterRepository.findByPredecessor(tlId);
 
 			// Initialize NABARD status as "NNB" by default
 			String isNabardType = "NNB";
 
 			// If TL employee record exists
-			if (tlEmployeeOptional.isPresent()) {
-				EmployeeMaster tlEmployee = tlEmployeeOptional.get();
+			if (tlEmployeeOptional != null) {
 
 				// Check if IS_NABARD field is not null, then set "NB", else keep "NNB"
-				if (tlEmployee.getIsNabard() != null) {
+				if (tlEmployeeOptional.getIsNabard() != null) {
 					isNabardType = "NB";
 				}
 			}
@@ -199,7 +197,7 @@ public class employeeRegisterServiceImpl implements EmployeeRegisterService {
 		Map<String, Object> responseMap = new HashMap<>();
 
 		try {
-			
+
 //			// Decrypt password from encrypted input
 //			String decryptedPassword = IRManager.decrypt(dto.getPassword()); // assuming you have a password field
 //			String encryptedPassword = PasswordCryptography.encrypt(decryptedPassword);
@@ -218,8 +216,37 @@ public class employeeRegisterServiceImpl implements EmployeeRegisterService {
 			// Get Module Code for team
 			Long moduleCode = getModuleCode(dto.getTeam());
 
-			// Combine Bank names into comma-separated string
-			String bankList = dto.getBank(); // assuming this is already comma-separated in DTO, or process as needed
+			String bankList = String.join(", ", dto.getBankList());
+
+			// 👉 Add User into EmployeeMaster
+			EmployeeMaster employee = new EmployeeMaster();
+			employee.setEmpId(dto.getEmpId());
+			employee.setEmpName(dto.getUName());
+//			employee.setPassword(decryptedPassword);
+//			employee.setEnPassword(encryptedPassword);
+			employee.setGender(dto.getGender());
+			employee.setEmailId(dto.getEmail());
+			employee.setEmail2(dto.getEmail2());
+			employee.setDob(dto.getDob());
+			employee.setDoj(dto.getDoj());
+			employee.setMobile(dto.getMobile());
+			employee.setExtension(dto.getExtension());
+			employee.setBlood(dto.getBlood());
+			employee.setEmployeeOf(dto.getTeam());
+			employee.setCity(dto.getCity());
+			employee.setState(dto.getState());
+			employee.setDesignation(dto.getDesignation());
+			employee.setProject(dto.getProject());
+			employee.setBank(bankList);
+			employee.setAlternateNo(dto.getAlternateNo());
+			employee.setStateCode(stateCode);
+			employee.setEmpStatus(1);
+			employee.setIsDeleted("N");
+			employee.setAddress(dto.getAddress());
+			employee.setContractDate(dto.getContractDate());
+			employee.setModuleCode(moduleCode.intValue());
+
+			employeeMasterRepository.save(employee);
 
 			// Save data into REGISTER_MASTER table via entity & repository
 			RegisterMaster register = new RegisterMaster();
@@ -264,7 +291,6 @@ public class employeeRegisterServiceImpl implements EmployeeRegisterService {
 				updateTeamOwner(dto.getEmpId(), dto.getUName(), moduleCode.toString());
 			}
 
-			// 9️⃣ Prepare response
 			responseMap.put(Constants.SUCCESS, "User Registered Successfully!");
 			responseMap.put(Constants.ERROR, null);
 
@@ -329,6 +355,52 @@ public class employeeRegisterServiceImpl implements EmployeeRegisterService {
 		} catch (Exception e) {
 			log.error("Error while updating team owner: {}", e.getMessage());
 			throw new TechnicalException(HttpStatus.INTERNAL_SERVER_ERROR, Constants.TECHNICAL_ERROR);
+		}
+	}
+
+	public boolean updateEmployeeDetails(String empId, EmployeeMaster updatedDetails) {
+		log.info("Updating employee details for EMP_ID: {}", empId);
+
+		try {
+			EmployeeMaster employee = employeeMasterRepository.findById(empId).orElseThrow(() ->
+
+			new BussinessException(HttpStatus.NOT_FOUND, "Employee not found for ID: " + empId));
+
+			employee.setEmpName(updatedDetails.getEmpName());
+			employee.setPassword(updatedDetails.getPassword());
+			employee.setGender(updatedDetails.getGender());
+			employee.setEmailId(updatedDetails.getEmailId());
+			employee.setEmail2(updatedDetails.getEmail2());
+			employee.setDob(updatedDetails.getDob());
+			employee.setDoj(updatedDetails.getDoj());
+			employee.setMobile(updatedDetails.getMobile());
+			employee.setExtension(updatedDetails.getExtension());
+			employee.setBlood(updatedDetails.getBlood());
+			employee.setEmployeeOf(updatedDetails.getEmployeeOf());
+			employee.setCity(updatedDetails.getCity());
+			employee.setState(updatedDetails.getState());
+			employee.setSq(updatedDetails.getSq());
+			employee.setSa(updatedDetails.getSa());
+			employee.setDesignation(updatedDetails.getDesignation());
+			employee.setProject(updatedDetails.getProject());
+			employee.setBank(updatedDetails.getBank());
+			employee.setAlternateNo(updatedDetails.getAlternateNo());
+			employee.setStateCode(updatedDetails.getStateCode());
+			employee.setIsDeleted("N");
+			employee.setAddress(updatedDetails.getAddress());
+			employee.setContractDate(updatedDetails.getContractDate());
+			employee.setEnPassword(updatedDetails.getEnPassword());
+
+			employeeMasterRepository.save(employee);
+
+			log.info("Employee details updated successfully for EMP_ID: {}", empId);
+			return true;
+
+		} catch (Exception e) {
+			log.error("Error while updating employee details: {}", e.getMessage());
+//			throw new TechnicalException("Technical error while updating employee details.");
+			throw new TechnicalException(HttpStatus.INTERNAL_SERVER_ERROR, Constants.TECHNICAL_ERROR);
+
 		}
 	}
 

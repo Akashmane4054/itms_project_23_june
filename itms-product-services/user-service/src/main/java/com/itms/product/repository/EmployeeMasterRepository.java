@@ -16,5 +16,8 @@ public interface EmployeeMasterRepository extends JpaRepository<EmployeeMaster, 
 
 	@Query("SELECT COUNT(e) FROM EmployeeMaster e WHERE e.empId = :empId")
 	long countByEmpId(@Param("empId") String empId);
+	
+	public EmployeeMaster findByPredecessor(String empId);
+
 
 }
