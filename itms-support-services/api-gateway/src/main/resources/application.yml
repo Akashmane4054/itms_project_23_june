@@ -1,3 +1,45 @@
+server:
+  port: 9010
+
 spring:
-  profiles:
-    active: main
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true  # Allows routes like /user-service/**
+
+      routes:
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/user-service/**  # All requests to /user-service/** will be routed
+          filters:
+            - StripPrefix=1  # Removes 'user-service' from the path before forwarding
+
+    discovery:
+      enabled: true
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty.http.client: DEBUG
+
+# Optional: Enable CORS globally (if needed)
+# Add CORS configuration if your frontend is on a different port (like 4200)
+# This section is optional and can be removed if handled in code
+# management:
+#   endpoints:
+#     web:
+#       exposure:
+#         include: "*"

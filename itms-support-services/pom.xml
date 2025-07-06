@@ -21,7 +21,6 @@
 	<modules>
 		<module>config-server</module>
 		<module>discovery-server</module>
-		<module>edge-service</module>
 		<module>api-gateway</module>
 	</modules>
 
