@@ -10,7 +10,6 @@ server:
   port: 9002
   servlet:
     context-path: /user-service	
-# Main profile-specific configuration
 ---
 spring:
   config:
