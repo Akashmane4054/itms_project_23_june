@@ -10,7 +10,7 @@ spring:
       discovery:
         locator:
           enabled: true
-          lower-case-service-id: true  # Allows routes like /user-service/**
+          lower-case-service-id: true
 
       routes:
         - id: USER-SERVICE
@@ -39,7 +39,8 @@ eureka:
 logging:
   level:
     org.springframework.cloud.gateway: DEBUG
-    reactor.netty.http.client: DEBUG
+    reactor.netty: DEBUG
+
 
 # Auth Service URL configuration for JWT validation filter
 auth:

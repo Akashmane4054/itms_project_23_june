@@ -14,8 +14,8 @@
 
 	<properties>
 		<com.itms.version>0.0.1-SNAPSHOT</com.itms.version>
-		<spring.boot.version>3.3.3</spring.boot.version>
-		<spring.cloud.version>2023.0.3</spring.cloud.version>
+		<spring.boot.version>3.4.3</spring.boot.version>
+		<spring.cloud.version>2024.0.1</spring.cloud.version>
 		<mysql.version>8.0.33</mysql.version>
 		<hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
 	</properties>
