@@ -49,4 +49,5 @@ public class EmployeeMasterDTO {
     private LocalDateTime lastOtpValidation;
     private String isMobileUpdatePending;
     private LocalDateTime lastForgotValidation;
+    private String groupLogin;
 }
