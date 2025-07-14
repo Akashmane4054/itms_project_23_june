@@ -50,4 +50,5 @@ public class EmployeeMasterDTO {
     private String isMobileUpdatePending;
     private LocalDateTime lastForgotValidation;
     private String groupLogin;
+    private String logoutOld;
 }

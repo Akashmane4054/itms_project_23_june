@@ -15,7 +15,7 @@ public interface RegisterMasterRepository extends JpaRepository<RegisterMaster, 
 
 	@Modifying
 	@Transactional
-	@Query(value = "UPDATE register_master SET LAST_LOGIN = SYSDATE, LOGGED_IN = 'true' WHERE EMPID = :empId", nativeQuery = true)
+	@Query(value = "UPDATE register_master SET LAST_LOGIN = NOW(), LOGGED_IN = 'true' WHERE EMPID = :empId", nativeQuery = true)
 	int updateLastLogin(@Param("empId") String empId);
 
 }

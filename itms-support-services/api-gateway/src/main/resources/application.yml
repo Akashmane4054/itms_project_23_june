@@ -20,10 +20,24 @@ spring:
           filters:
             - StripPrefix=1
 
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOriginPatterns:
+              - "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+
     discovery:
       enabled: true
 
-# Eureka client configuration
 eureka:
   client:
     register-with-eureka: true
@@ -35,14 +49,11 @@ eureka:
     lease-renewal-interval-in-seconds: 30
     lease-expiration-duration-in-seconds: 90
 
-# Logging configuration
 logging:
   level:
     org.springframework.cloud.gateway: DEBUG
     reactor.netty: DEBUG
 
-
-# Auth Service URL configuration for JWT validation filter
 auth:
   service:
-    url: http://localhost:9002/loginWithLoginId  # Update this to your actual Auth service endpoint
+    url: http://localhost:9002/loginWithLoginId

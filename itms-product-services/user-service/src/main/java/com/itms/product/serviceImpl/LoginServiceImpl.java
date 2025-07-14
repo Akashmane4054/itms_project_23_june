@@ -94,10 +94,13 @@ public class LoginServiceImpl implements LoginService {
 				return responseMap;
 			}
 
-			if (isAlreadyLoggedIn(employeeMasterDto.getEmpId())
-					&& !"true".equalsIgnoreCase(employeeMasterDto.getLogoutOld())) {
-				responseMap.put("alreadyLoggedIn", "true");
-				return responseMap;
+			if (isAlreadyLoggedIn(employeeMasterDto.getEmpId())) {
+				if (!"true".equalsIgnoreCase(employeeMasterDto.getLogoutOld())) {
+					responseMap.put("alreadyLoggedIn", "true");
+					return responseMap;
+				} else {
+					logoutOldSession(employeeMasterDto.getEmpId());
+				}
 			}
 
 			String token = jwtService.generateToken(employee.getEmpId());
@@ -108,8 +111,7 @@ public class LoginServiceImpl implements LoginService {
 			responseMap.put("token", token);
 			responseMap.put("employeeId", employee.getEmpId());
 			responseMap.put("mobileVerified", employee.getIsMobileVerified());
-			responseMap.put("forcePassword", forcePassword);
-			responseMap.put("ageTicketAlert", getAgedTicketAlerts(employeeMasterDto.getEmpId()));
+//			responseMap.put("forcePassword", forcePassword);
 			responseMap.put("roleType", "Employee");
 			responseMap.put("error", null);
 
@@ -176,6 +178,19 @@ public class LoginServiceImpl implements LoginService {
 		int userCount = employeeMasterRepository.countValidUser(empId, password);
 		log.info("Login attempt for EMP_ID {} - Valid User: {}", empId, userCount > 0);
 		return userCount > 0;
+	}
+
+	public boolean isAlreadyLoggedIn(String empId) {
+		EmployeeMaster employee = employeeMasterRepository.findByEmpId(empId);
+		if (employee != null) {
+			return "true".equalsIgnoreCase(employee.getLoggedIn());
+		}
+		return false;
+	}
+
+	@Transactional
+	public void logoutOldSession(String empId) {
+		employeeMasterRepository.updateLoggedInStatus(empId, "false");
 	}
 
 	@Transactional
