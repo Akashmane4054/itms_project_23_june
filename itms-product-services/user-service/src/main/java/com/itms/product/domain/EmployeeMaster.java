@@ -179,4 +179,5 @@ public class EmployeeMaster {
 
 	@Column(name = "P2", length = 50)
 	private String p2;
+
 }

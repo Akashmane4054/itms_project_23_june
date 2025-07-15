@@ -4,7 +4,7 @@ public class Constants {
 
 	public static final String TECHNICAL_ERROR = "Some technical exception while performing the operation, please check logs for more info.";
 	public static final String INVALID_CREDENTIALS = "Invalid credentials. Please verify";
-	public static final String IS_ALREADY_LOGGIN = "isAlreadyLoggin";
+	public static final String IS_ALREADY_LOGIN = "AlreadyLoggedIn";
 	public static final String FIRST_TIME_LOGIN = "firstTimeLogin";
 	public static final String USER_AUTHENTICATED_SUCCESSFULLY = "User Authenticated Successfully";
 	public static final String USER_IS_BLOCK_FOR_1_HOUR = "User is blocked for next 1 hour";

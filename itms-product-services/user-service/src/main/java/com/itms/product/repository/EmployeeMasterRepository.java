@@ -44,14 +44,22 @@ public interface EmployeeMasterRepository extends JpaRepository<EmployeeMaster, 
 	@Query(value = "SELECT COUNT(*) FROM employee_master WHERE EMP_ID = :empId AND PASSWORD = :password", nativeQuery = true)
 	int countValidUser(@Param("empId") String empId, @Param("password") String password);
 
-	@Modifying
-	@Transactional
-	@Query("UPDATE EmployeeMaster e SET e.loggedIn = :status WHERE e.empId = :empId")
-	void updateLoggedInStatus(@Param("empId") String empId, @Param("status") String status);
+//	@Modifying
+//	@Transactional
+//	@Query("UPDATE EmployeeMaster e SET e.loggedIn = :status WHERE e.empId = :empId")
+//	void updateLoggedInStatus(@Param("empId") String empId, @Param("status") String status);
 
+//	@Modifying
+//	@Transactional
+//	@Query("UPDATE EmployeeMaster e SET e.lastLogin = CURRENT_TIMESTAMP, e.loggedIn = 'true' WHERE e.empId = :empId")
+//	void updateLastLogin(@Param("empId") String empId);
+//	
+	
 	@Modifying
 	@Transactional
-	@Query("UPDATE EmployeeMaster e SET e.lastLogin = CURRENT_TIMESTAMP, e.loggedIn = 'true' WHERE e.empId = :empId")
-	void updateLastLogin(@Param("empId") String empId);
+	@Query(value = "UPDATE employee_master SET LAST_LOGIN = NOW(), LOGGED_IN = 'true' WHERE EMP_ID = :empId", nativeQuery = true)
+	int updateLastLogin(@Param("empId") String empId);
+
+
 
 }

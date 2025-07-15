@@ -5,7 +5,9 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +21,11 @@ import com.itms.core.exception.TechnicalException;
 import com.itms.core.util.Constants;
 import com.itms.core.util.LogUtil;
 import com.itms.product.domain.EmployeeMaster;
+import com.itms.product.domain.UserToken;
 import com.itms.product.dto.EmployeeMasterDTO;
 import com.itms.product.repository.EmployeeMasterRepository;
 import com.itms.product.repository.RegisterMasterRepository;
+import com.itms.product.repository.UserTokenRepository;
 import com.itms.product.service.JwtService;
 import com.itms.product.service.LoginService;
 
@@ -44,6 +48,9 @@ public class LoginServiceImpl implements LoginService {
 	@Autowired
 	private JwtService jwtService;
 
+	@Autowired
+	private UserTokenRepository userTokenRepository;
+
 	private static final String CLASSNAME = LoginServiceImpl.class.getSimpleName();
 
 	@Override
@@ -54,18 +61,20 @@ public class LoginServiceImpl implements LoginService {
 		log.info(LogUtil.startLog(CLASSNAME));
 
 		try {
-			EmployeeMaster employee = employeeMasterRepository.findByEmpId(employeeMasterDto.getEmpId());
 
+			// 1️ Check user existence
+			EmployeeMaster employee = employeeMasterRepository.findByEmpId(employeeMasterDto.getEmpId());
 			if (employee == null) {
 				throw new BussinessException(HttpStatus.UNAUTHORIZED, "Invalid login ID");
 			}
 
+			// 2️ Validate password
 			if (!employeeMasterDto.getPassword().equals(employee.getPassword())) {
 				throw new BussinessException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
 			}
 
+			// 3️ Check login attempt count
 			int loginAttempts = getMaxLoginAttempts(employeeMasterDto.getEmpId());
-
 			if (loginAttempts > 3) {
 				if (getLastFailedLoginTime12hrs(employeeMasterDto.getEmpId())) {
 					resetLoginCount(employeeMasterDto.getEmpId());
@@ -75,6 +84,7 @@ public class LoginServiceImpl implements LoginService {
 				}
 			}
 
+			// 4️ Validate user against DB
 			if (!isValidUser(employeeMasterDto.getEmpId(), employeeMasterDto.getPassword())) {
 				updateLoginCount(loginAttempts + 1, employeeMasterDto.getEmpId());
 //				responseMap.put("roleType", " ");
@@ -82,30 +92,56 @@ public class LoginServiceImpl implements LoginService {
 				return responseMap;
 			}
 
+			// 5️ Check password age (3 months policy)
 			String forcePassword = "false";
 			if (employee.getLastPasswordChange() == null || ChronoUnit.MONTHS
 					.between(employee.getLastPasswordChange().toLocalDate(), LocalDate.now()) >= 3) {
 				forcePassword = "true";
 			}
 
+			// 6️. Check mobile number verification
 			if (!"Y".equalsIgnoreCase(employee.getIsMobileVerified())) {
 				responseMap.put("loginOtp", "true");
 				responseMap.put("popupMessage", "Please verify your mobile number through OTP validation.");
 				return responseMap;
 			}
 
-			if (isAlreadyLoggedIn(employeeMasterDto.getEmpId())) {
+			// 7️ Active token-based session check (is already logged-in logic)
+//			List<UserToken> activeTokens = userTokenRepository.findByEmpIdAndLoggedInTrue(employeeMasterDto.getEmpId());
+//
+//			if (!activeTokens.isEmpty() && employeeMasterDto.getLogoutOld() == "true") {
+//				setIsAlreadyLoginFlagAndRevokeIfFirstTime(responseMap, activeTokens, employeeMasterDto);
+//				if (Boolean.TRUE.equals(responseMap.get(Constants.IS_ALREADY_LOGGIN))) {
+//					return responseMap;
+//				}
+//			}
+//			
+
+			List<UserToken> activeTokens = userTokenRepository.findByEmpIdAndLoggedInTrue(employeeMasterDto.getEmpId());
+
+			if (!activeTokens.isEmpty()) {
 				if (!"true".equalsIgnoreCase(employeeMasterDto.getLogoutOld())) {
-					responseMap.put("alreadyLoggedIn", "true");
+					responseMap.put(Constants.IS_ALREADY_LOGIN, Boolean.TRUE);
 					return responseMap;
 				} else {
-					logoutOldSession(employeeMasterDto.getEmpId());
+					// LogoutOld = true — revoke (delete) all active tokens
+					for (UserToken token : activeTokens) {
+						userTokenRepository.deleteByToken(token.getToken());
+					}
 				}
 			}
 
+			// 8️. Generate JWT token
 			String token = jwtService.generateToken(employee.getEmpId());
 
-			insertLastLogin(employeeMasterDto.getEmpId());
+			// 9️ Save new UserToken record
+			UserToken userToken = new UserToken();
+			userToken.setEmpId(employee.getEmpId());
+			userToken.setToken(token);
+			userToken.setExpiration(jwtService.getExpirationDateFromToken(token)); // assuming your service has this
+																					// method
+			userToken.setLoggedIn(true);
+			userTokenRepository.save(userToken);
 
 			responseMap.put("success", "User Authenticated Successfully");
 			responseMap.put("token", token);
@@ -180,28 +216,37 @@ public class LoginServiceImpl implements LoginService {
 		return userCount > 0;
 	}
 
-	public boolean isAlreadyLoggedIn(String empId) {
-		EmployeeMaster employee = employeeMasterRepository.findByEmpId(empId);
-		if (employee != null) {
-			return "true".equalsIgnoreCase(employee.getLoggedIn());
-		}
-		return false;
-	}
+//	public boolean isAlreadyLoggedIn(String empId) {
+//		UserToken userToken = userTokenRepository.findTokensByEmpIdAndLoggedIn(empId, Boolean.TRUE);
+//		if (userToken != null) {
+//			return Boolean.TRUE.equals(userToken.getLoggedIn());
+//		}
+//		return false;
+//	}
 
 	@Transactional
 	public void logoutOldSession(String empId) {
-		employeeMasterRepository.updateLoggedInStatus(empId, "false");
+		userTokenRepository.updateLoggedInStatus(empId, "false");
 	}
 
-	@Transactional
-	public boolean insertLastLogin(String empId) {
-		int rowsUpdated = registerMasterRepository.updateLastLogin(empId);
-		if (rowsUpdated > 0) {
-			log.info("Last login timestamp and status updated for EMPID: {}", empId);
-			return true;
-		} else {
-			log.warn("No register_master record found for EMPID: {}", empId);
-			return false;
+	private void setIsAlreadyLoginFlagAndRevokeIfFirstTime(Map<String, Object> map, List<UserToken> tokens,
+			EmployeeMasterDTO employeeMasterDto) {
+
+		String logoutOld = employeeMasterDto.getLogoutOld();
+
+		for (UserToken token : tokens) {
+			if (token.getExpiration().after(new Date())) {
+				// Active token found — mark already logged-in
+				map.put(Constants.IS_ALREADY_LOGIN, Boolean.TRUE);
+
+				// If first-time login and old token exists — revoke it
+				if (logoutOld.equalsIgnoreCase("true")) {
+					userTokenRepository.deleteByToken(token.getToken());
+				} else {
+					// If not first-time login, break early since session already exists
+					break;
+				}
+			}
 		}
 	}
 

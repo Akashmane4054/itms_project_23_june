@@ -1,6 +1,6 @@
 package com.itms.product.domain;
 
-import java.sql.Date;
+import java.util.Date;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,13 +28,9 @@ public class UserToken {
 
 	private String token;
 
-	@Column(name = "expiration", nullable = false)
 	private Date expiration;
 
-	@Column(name = "is_logged_out", nullable = false)
-	private Boolean loggedOut = false;
-
-	@Column(name = "created_date")
-	private Date createdDate;
+	@Column(name = "logged_in")
+	private Boolean loggedIn;
 
 }

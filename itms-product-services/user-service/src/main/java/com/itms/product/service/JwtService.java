@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -61,4 +62,25 @@ public class JwtService {
 		final String username = extractUsername(token);
 		return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
 	}
+
+	// Retrieve expiration date from token
+	public Date getExpirationDateFromToken(String token) {
+		return getClaimFromToken(token, Claims::getExpiration);
+	}
+
+	private <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
+		final Claims claims = getAllClaimsFromToken(token);
+		return claimsResolver.apply(claims);
+	}
+
+	@SuppressWarnings("deprecation")
+	private Claims getAllClaimsFromToken(String token) {
+		try {
+			return Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token).getBody();
+		} catch (ExpiredJwtException e) {
+			// Extract claims from expired token
+			return e.getClaims();
+		}
+	}
+
 }
