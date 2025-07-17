@@ -250,4 +250,24 @@ public class LoginServiceImpl implements LoginService {
 		}
 	}
 
+	@Override
+	public Map<String, Object> forgatePassword(EmployeeMasterDTO employeeMasterDto)
+			throws BussinessException, TechnicalException, ContractException {
+
+		Map<String, Object> responseMap = new HashMap<>();
+		log.info(LogUtil.startLog(CLASSNAME));
+
+		try {
+			
+			
+
+		} catch (Exception e) {
+			log.error(LogUtil.errorLog(e));
+			throw new TechnicalException(HttpStatus.INTERNAL_SERVER_ERROR, Constants.TECHNICAL_ERROR);
+		}
+
+		log.info(LogUtil.exitLog(CLASSNAME));
+		return responseMap;
+	}
+
 }

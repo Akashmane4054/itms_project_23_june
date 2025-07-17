@@ -32,5 +32,13 @@ public class loginController {
 		log.info(LogUtil.presentationLogger(EndPointReference.LOGIN_WITH_LOGIN_ID));
 		return loginService.loginWithLoginId(employeeMasterDto);
 	}
+	
+	
+	@PostMapping(EndPointReference.FORGATE_PASSWORD)
+	public Map<String, Object> forgatePassword(@RequestBody EmployeeMasterDTO employeeMasterDto)
+			throws BussinessException, TechnicalException, ContractException {
+		log.info(LogUtil.presentationLogger(EndPointReference.FORGATE_PASSWORD));
+		return loginService.forgatePassword(employeeMasterDto);
+	}
 
 }

@@ -10,6 +10,9 @@ public final class EndPointReference {
 	
 	
 	public static final String REGISTER_USER = "registerUser";
+	
+	public static final String FORGATE_PASSWORD = "forgatePassword";
+
 
 
 
