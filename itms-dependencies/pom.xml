@@ -18,6 +18,10 @@
 		<spring.cloud.version>2024.0.1</spring.cloud.version>
 		<mysql.version>8.0.33</mysql.version>
 		<hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
+		<maven.compiler.plugin.version>3.11.0</maven.compiler.plugin.version>
+		<maven.surefire.plugin.version>3.2.5</maven.surefire.plugin.version>
+		<java.version>17</java.version>
+
 	</properties>
 
 	<dependencies>
@@ -90,5 +94,37 @@
 			</build>
 		</profile>
 	</profiles>
+
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<!-- Maven Compiler Plugin -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>${maven.compiler.plugin.version}</version>
+					<configuration>
+						<source>${java.version}</source>
+						<target>${java.version}</target>
+					</configuration>
+				</plugin>
+
+				<!-- Surefire Plugin for unit tests -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>${maven.surefire.plugin.version}</version>
+				</plugin>
+
+				<!-- Spring Boot Maven Plugin (for optional override) -->
+				<plugin>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-maven-plugin</artifactId>
+					<version>${spring.boot.version}</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
 
 </project>

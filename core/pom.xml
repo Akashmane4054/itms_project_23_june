@@ -6,8 +6,9 @@
 
 	<parent>
 		<groupId>com.itms</groupId>
-		<artifactId>itms-common</artifactId>
+		<artifactId>itms-dependencies</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../itms-dependencies</relativePath>
 	</parent>
 
 	<artifactId>core</artifactId>

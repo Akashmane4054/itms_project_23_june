@@ -1,5 +1,5 @@
 echo "       ------------------------------------------------------------------------"
-echo "       Building ehr-dependencies"
+echo "       Building itms-dependencies"
 echo "       ------------------------------------------------------------------------"
 mvn -f ./itms-dependencies/pom.xml clean install -Dmaven.skip.test=true
 if [ $? != 0 ]
@@ -8,7 +8,7 @@ then echo "Build failure while running the itms-dependencies"
 fi
 
 echo "       ------------------------------------------------------------------------"
-echo "       Building ehr-parent"
+echo "       Building itms-parent"
 echo "       ------------------------------------------------------------------------"
 mvn -f ./itms-parent/pom.xml clean install -Dmaven.skip.test=true
 if [ $? != 0 ]

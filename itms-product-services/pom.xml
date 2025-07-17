@@ -4,12 +4,22 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<parent>
+	<!--<parent>
 		<groupId>com.itms</groupId>
 		<artifactId>itms-parent</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 		<relativePath>../itms-parent</relativePath>
 	</parent>
+	-->
+	
+	<parent>
+		<groupId>com.itms</groupId>
+		<artifactId>itms-dependencies</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../itms-dependencies</relativePath>
+	</parent>
+	
+	
 
 	<artifactId>itms-product-services</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
