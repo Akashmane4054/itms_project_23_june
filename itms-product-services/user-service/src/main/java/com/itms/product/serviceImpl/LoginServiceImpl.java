@@ -68,11 +68,6 @@ public class LoginServiceImpl implements LoginService {
 				throw new BussinessException(HttpStatus.UNAUTHORIZED, "Invalid login ID");
 			}
 
-			// 2️ Validate password
-			if (!employeeMasterDto.getPassword().equals(employee.getPassword())) {
-				throw new BussinessException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
-			}
-
 			// 3️ Check login attempt count
 			int loginAttempts = getMaxLoginAttempts(employeeMasterDto.getEmpId());
 			if (loginAttempts > 3) {
@@ -88,15 +83,20 @@ public class LoginServiceImpl implements LoginService {
 			if (!isValidUser(employeeMasterDto.getEmpId(), employeeMasterDto.getPassword())) {
 				updateLoginCount(loginAttempts + 1, employeeMasterDto.getEmpId());
 //				responseMap.put("roleType", " ");
-				responseMap.put("redirect", "sessionTimeout");
-				return responseMap;
+//				responseMap.put("redirect", "sessionTimeout");
+//				return responseMap;
+
+				throw new BussinessException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
+
 			}
 
 			// 5️ Check password age (3 months policy)
 			String forcePassword = "false";
 			if (employee.getLastPasswordChange() == null || ChronoUnit.MONTHS
 					.between(employee.getLastPasswordChange().toLocalDate(), LocalDate.now()) >= 3) {
-				forcePassword = "true";
+
+				responseMap.put("forcePasswordChange", "true");
+				return responseMap;
 			}
 
 			// 6️. Check mobile number verification
@@ -106,17 +106,7 @@ public class LoginServiceImpl implements LoginService {
 				return responseMap;
 			}
 
-			// 7️ Active token-based session check (is already logged-in logic)
-//			List<UserToken> activeTokens = userTokenRepository.findByEmpIdAndLoggedInTrue(employeeMasterDto.getEmpId());
-//
-//			if (!activeTokens.isEmpty() && employeeMasterDto.getLogoutOld() == "true") {
-//				setIsAlreadyLoginFlagAndRevokeIfFirstTime(responseMap, activeTokens, employeeMasterDto);
-//				if (Boolean.TRUE.equals(responseMap.get(Constants.IS_ALREADY_LOGGIN))) {
-//					return responseMap;
-//				}
-//			}
-//			
-
+	
 			List<UserToken> activeTokens = userTokenRepository.findByEmpIdAndLoggedInTrue(employeeMasterDto.getEmpId());
 
 			if (!activeTokens.isEmpty()) {
@@ -138,8 +128,8 @@ public class LoginServiceImpl implements LoginService {
 			UserToken userToken = new UserToken();
 			userToken.setEmpId(employee.getEmpId());
 			userToken.setToken(token);
-			userToken.setExpiration(jwtService.getExpirationDateFromToken(token)); // assuming your service has this
-																					// method
+			userToken.setExpiration(jwtService.getExpirationDateFromToken(token));
+
 			userToken.setLoggedIn(true);
 			userTokenRepository.save(userToken);
 
@@ -226,7 +216,7 @@ public class LoginServiceImpl implements LoginService {
 
 	@Transactional
 	public void logoutOldSession(String empId) {
-		userTokenRepository.updateLoggedInStatus(empId, "false");
+		userTokenRepository.updateLoggedInStatus(empId, Boolean.FALSE);
 	}
 
 	private void setIsAlreadyLoginFlagAndRevokeIfFirstTime(Map<String, Object> map, List<UserToken> tokens,
@@ -258,8 +248,6 @@ public class LoginServiceImpl implements LoginService {
 		log.info(LogUtil.startLog(CLASSNAME));
 
 		try {
-			
-			
 
 		} catch (Exception e) {
 			log.error(LogUtil.errorLog(e));

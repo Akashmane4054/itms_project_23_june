@@ -21,13 +21,12 @@ public interface UserTokenRepository extends JpaRepository<UserToken, Long> {
 	List<UserToken> findByEmpIdAndLoggedInTrue(@Param("empId") String empId);
 
 	@Modifying
-	@Transactional  // this is important
+	@Transactional
 	@Query("DELETE FROM UserToken u WHERE u.token = :token")
 	void deleteByToken(@Param("token") String token);
 
 	@Modifying
 	@Transactional
-	@Query("UPDATE UserToken e SET e.loggedIn = :status WHERE e.empId = :empId")
-	void updateLoggedInStatus(@Param("empId") String empId, @Param("status") String status);
-
+	@Query("UPDATE UserToken u SET u.loggedIn = :status WHERE u.empId = :empId")
+	void updateLoggedInStatus(@Param("empId") String empId, @Param("status") Boolean status);
 }

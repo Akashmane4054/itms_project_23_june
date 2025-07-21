@@ -56,12 +56,12 @@
 				<scope>import</scope>
 			</dependency>
 
-			<!-- MySQL JDBC Driver -->
+	<!--		 MySQL JDBC Driver 
 			<dependency>
 				<groupId>mysql</groupId>
 				<artifactId>mysql-connector-java</artifactId>
 				<version>${mysql.version}</version>
-			</dependency>
+			</dependency>-->
 
 			<!-- Hibernate Validator -->
 			<dependency>

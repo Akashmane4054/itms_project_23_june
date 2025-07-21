@@ -16,14 +16,10 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "user_tokens")
+@Table(name = "TOKEN_LOG")
 public class UserToken {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-
-	@Column(nullable = false)
 	private String empId;
 
 	private String token;
