@@ -54,6 +54,7 @@ public class LoginServiceImpl implements LoginService {
 	private static final String CLASSNAME = LoginServiceImpl.class.getSimpleName();
 
 	@Override
+	@Transactional
 	public Map<String, Object> loginWithLoginId(EmployeeMasterDTO employeeMasterDto)
 			throws TechnicalException, BussinessException, ContractException {
 

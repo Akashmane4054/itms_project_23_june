@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EnableJpaRepositories(basePackages = "com.itms.product.repository")
 @EntityScan(basePackages = "com.itms.product.domain")
 @EnableDiscoveryClient
+@EnableFeignClients(basePackages = "com.itms.core.feignclients")
 public class UserServiceApplication {
 
 	public static void main(String[] args) {

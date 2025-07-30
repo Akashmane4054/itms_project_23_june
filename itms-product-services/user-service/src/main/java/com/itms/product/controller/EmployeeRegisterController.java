@@ -3,6 +3,7 @@ package com.itms.product.controller;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,6 +42,13 @@ public class EmployeeRegisterController {
 			throws BussinessException, TechnicalException, ContractException {
 		log.info(LogUtil.presentationLogger(EndPointReference.REGISTER_USER));
 		return employeeRegisterService.registerUser(registerMasterDTO);
+	}
+
+	@PostMapping(EndPointReference.GET_MODULE_CODE_BY_TEAM_NAME)
+	public Map<String, Object> getModuleCodeByteamName(@PathVariable String teamName)
+			throws BussinessException, TechnicalException, ContractException {
+		log.info(LogUtil.presentationLogger(EndPointReference.GET_MODULE_CODE_BY_TEAM_NAME));
+		return employeeRegisterService.getModuleCodeByteamName(teamName);
 	}
 
 }

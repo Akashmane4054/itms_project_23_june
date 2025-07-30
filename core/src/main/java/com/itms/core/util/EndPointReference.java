@@ -12,6 +12,12 @@ public final class EndPointReference {
 	public static final String REGISTER_USER = "registerUser";
 	
 	public static final String FORGATE_PASSWORD = "forgatePassword";
+	
+	public static final String ISSUE_TICKET = "issueTicket";
+	
+	public static final String GET_MODULE_CODE_BY_TEAM_NAME = "getModuleCodeByteamName";
+
+
 
 
 

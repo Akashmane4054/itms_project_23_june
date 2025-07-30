@@ -13,7 +13,7 @@ import com.itms.product.domain.UserToken;
 import jakarta.transaction.Transactional;
 
 @Repository
-public interface UserTokenRepository extends JpaRepository<UserToken, Long> {
+public interface UserTokenRepository extends JpaRepository<UserToken, String> {
 
 	List<UserToken> findTokensByEmpId(String empId);
 

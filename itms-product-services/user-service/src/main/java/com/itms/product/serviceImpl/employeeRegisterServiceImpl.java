@@ -3,6 +3,7 @@ package com.itms.product.serviceImpl;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -402,6 +403,35 @@ public class employeeRegisterServiceImpl implements EmployeeRegisterService {
 			throw new TechnicalException(HttpStatus.INTERNAL_SERVER_ERROR, Constants.TECHNICAL_ERROR);
 
 		}
+	}
+
+	@Override
+	public Map<String, Object> getModuleCodeByteamName(String teamName)
+			throws BussinessException, TechnicalException, ContractException {
+
+		Map<String, Object> response = new HashMap<>();
+
+		try {
+			Optional<TeamMaster> optionalTeam = teamMasterRepository.findByModuleName(teamName);
+
+			if (optionalTeam.isPresent()) {
+				Long moduleCode = optionalTeam.get().getModuleCode();
+				response.put("moduleCode", moduleCode);
+				response.put("status", "success");
+				response.put("message", "Module code retrieved successfully");
+			} else {
+				throw new BussinessException(HttpStatus.NOT_FOUND, "Team name not found: " + teamName);
+			}
+
+		} catch (BussinessException e) {
+			throw e;
+		} catch (Exception e) {
+//	        throw new TechnicalException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to retrieve module code", e);
+			throw new TechnicalException(HttpStatus.INTERNAL_SERVER_ERROR, Constants.TECHNICAL_ERROR);
+
+		}
+
+		return response;
 	}
 
 }
