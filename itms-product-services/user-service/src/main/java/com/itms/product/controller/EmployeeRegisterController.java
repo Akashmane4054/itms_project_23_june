@@ -51,4 +51,25 @@ public class EmployeeRegisterController {
 		return employeeRegisterService.getModuleCodeByteamName(teamName);
 	}
 
+	@PostMapping(EndPointReference.FIND_VH_ID_BY_MODULE_CODE)
+	public Map<String, Object> findVhIdByModuleCode(@PathVariable Integer moduleCode)
+			throws BussinessException, TechnicalException, ContractException {
+		log.info(LogUtil.presentationLogger(EndPointReference.FIND_VH_ID_BY_MODULE_CODE));
+		return employeeRegisterService.findVhIdByModuleCode(moduleCode);
+	}
+
+	@PostMapping(EndPointReference.FIND_TL_ID_BY_MODULE_CODE)
+	public Map<String, Object> findTlIdByModuleCode(@PathVariable Integer moduleCode)
+			throws BussinessException, TechnicalException, ContractException {
+		log.info(LogUtil.presentationLogger(EndPointReference.FIND_TL_ID_BY_MODULE_CODE));
+		return employeeRegisterService.findTlIdByModuleCode(moduleCode);
+	}
+
+	@PostMapping(EndPointReference.FIND_SPOC_TL_BY_EMP_ID)
+	public Map<String, Object> findSpocTlByEmpId(@PathVariable String empId)
+			throws BussinessException, TechnicalException, ContractException {
+		log.info(LogUtil.presentationLogger(EndPointReference.FIND_SPOC_TL_BY_EMP_ID));
+		return employeeRegisterService.findSpocTlByEmpId(empId);
+	}
+
 }

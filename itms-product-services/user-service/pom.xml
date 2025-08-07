@@ -104,11 +104,6 @@
 			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-openfeign</artifactId>
-		</dependency>
-
 
 		<!-- MySQL (permanently removed) -->
 		<!--
@@ -120,19 +115,11 @@
 		-->
 
 	</dependencies>
-	
-	
+
+
 	<dependencyManagement>
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-dependencies</artifactId>
-            <version>2024.0.1</version> <!-- You already said you're using this -->
-            <type>pom</type>
-            <scope>import</scope>
-        </dependency>
-    </dependencies>
-</dependencyManagement>
+
+	</dependencyManagement>
 
 </project>
 

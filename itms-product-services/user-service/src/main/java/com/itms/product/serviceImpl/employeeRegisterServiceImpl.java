@@ -434,4 +434,84 @@ public class employeeRegisterServiceImpl implements EmployeeRegisterService {
 		return response;
 	}
 
+	@Override
+	public Map<String, Object> findVhIdByModuleCode(Integer moduleCode)
+			throws BussinessException, TechnicalException, ContractException {
+
+		Map<String, Object> response = new HashMap<>();
+
+		try {
+			String vhId = employeeMasterRepository.findVhIdByModuleCode(moduleCode);
+
+			if (vhId != null && !vhId.isEmpty()) {
+				response.put("vhId", vhId);
+				response.put("status", "success");
+				response.put("message", "vhId retrieved successfully");
+			} else {
+				throw new BussinessException(HttpStatus.NOT_FOUND, "vhId ID not found for moduleCode: " + moduleCode);
+			}
+
+		} catch (BussinessException e) {
+			throw e;
+		} catch (Exception e) {
+			log.error("Error retrieving empId for moduleCode {}: {}", moduleCode, e.getMessage());
+			throw new TechnicalException(HttpStatus.INTERNAL_SERVER_ERROR, Constants.TECHNICAL_ERROR);
+		}
+
+		return response;
+	}
+
+	@Override
+	public Map<String, Object> findTlIdByModuleCode(Integer moduleCode)
+			throws BussinessException, TechnicalException, ContractException {
+		Map<String, Object> response = new HashMap<>();
+
+		try {
+			String TlId = employeeMasterRepository.findTlIdByModuleCode(moduleCode);
+
+			if (TlId != null && !TlId.isEmpty()) {
+				response.put("TlId", TlId);
+				response.put("status", "success");
+				response.put("message", "vhId retrieved successfully");
+			} else {
+				throw new BussinessException(HttpStatus.NOT_FOUND, "TlId ID not found for moduleCode: " + moduleCode);
+			}
+
+		} catch (BussinessException e) {
+			throw e;
+		} catch (Exception e) {
+			log.error("Error retrieving empId for moduleCode {}: {}", moduleCode, e.getMessage());
+			throw new TechnicalException(HttpStatus.INTERNAL_SERVER_ERROR, Constants.TECHNICAL_ERROR);
+		}
+
+		return response;
+	}
+
+	@Override
+	public Map<String, Object> findSpocTlByEmpId(String empId)
+			throws BussinessException, TechnicalException, ContractException {
+
+		Map<String, Object> response = new HashMap<>();
+
+		try {
+			String tlId = employeeMasterRepository.findPredecessorByEmpId(empId);
+
+			if (tlId != null && !tlId.isEmpty()) {
+				response.put("tlId", tlId);
+				response.put("status", "success");
+				response.put("message", "TL ID retrieved successfully");
+			} else {
+				throw new BussinessException(HttpStatus.NOT_FOUND, "TL ID not found for EMP_ID: " + empId);
+			}
+
+		} catch (BussinessException e) {
+			throw e;
+		} catch (Exception e) {
+			log.error("Error retrieving TL ID for EMP_ID {}: {}", empId, e.getMessage());
+			throw new TechnicalException(HttpStatus.INTERNAL_SERVER_ERROR, Constants.TECHNICAL_ERROR);
+		}
+
+		return response;
+	}
+
 }

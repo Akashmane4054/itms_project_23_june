@@ -3,8 +3,10 @@ package com.itms.product.controller;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.itms.core.exception.BussinessException;
@@ -25,10 +27,11 @@ public class ticketController {
 	private ticketService ticketService;
 
 	@PostMapping(EndPointReference.ISSUE_TICKET)
-	public Map<String, Object> issueTicket(@RequestBody TicketRequestDTO dto)
+	public Map<String, Object> issueTicket(@RequestBody TicketRequestDTO dto,
+			@RequestHeader MultiValueMap<String, String> headers)
 			throws BussinessException, TechnicalException, ContractException {
 		log.info(LogUtil.presentationLogger(EndPointReference.ISSUE_TICKET));
-		return ticketService.issueTicket(dto);
+		return ticketService.issueTicket(dto,headers);
 	}
 
 }

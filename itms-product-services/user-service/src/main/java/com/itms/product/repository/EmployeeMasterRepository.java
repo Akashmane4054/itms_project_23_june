@@ -54,12 +54,19 @@ public interface EmployeeMasterRepository extends JpaRepository<EmployeeMaster, 
 //	@Query("UPDATE EmployeeMaster e SET e.lastLogin = CURRENT_TIMESTAMP, e.loggedIn = 'true' WHERE e.empId = :empId")
 //	void updateLastLogin(@Param("empId") String empId);
 //	
-	
+
 	@Modifying
 	@Transactional
 	@Query(value = "UPDATE employee_master SET LAST_LOGIN = NOW(), LOGGED_IN = 'true' WHERE EMP_ID = :empId", nativeQuery = true)
 	int updateLastLogin(@Param("empId") String empId);
 
+	@Query("SELECT e.empId FROM employee_master e WHERE e.roleId = 20 AND e.moduleCode = :moduleCode")
+	String findVhIdByModuleCode(Integer moduleCode);
 
+	@Query("SELECT e.empId FROM employee_master e WHERE e.roleId = 3 AND e.moduleCode = :moduleCode")
+	String findTlIdByModuleCode(Integer moduleCode);
+
+	@Query("SELECT e.predecessor FROM EmployeeMaster e WHERE e.empId = :empId")
+	String findPredecessorByEmpId(@Param("empId") String empId);
 
 }

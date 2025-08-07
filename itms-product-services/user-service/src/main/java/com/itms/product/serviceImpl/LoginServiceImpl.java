@@ -9,11 +9,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MultiValueMap;
 
 import com.itms.core.exception.BussinessException;
 import com.itms.core.exception.ContractException;
@@ -23,6 +28,7 @@ import com.itms.core.util.LogUtil;
 import com.itms.product.domain.EmployeeMaster;
 import com.itms.product.domain.UserToken;
 import com.itms.product.dto.EmployeeMasterDTO;
+import com.itms.product.filter.CustomUserDetails;
 import com.itms.product.repository.EmployeeMasterRepository;
 import com.itms.product.repository.RegisterMasterRepository;
 import com.itms.product.repository.UserTokenRepository;
@@ -107,7 +113,6 @@ public class LoginServiceImpl implements LoginService {
 				return responseMap;
 			}
 
-	
 			List<UserToken> activeTokens = userTokenRepository.findByEmpIdAndLoggedInTrue(employeeMasterDto.getEmpId());
 
 			if (!activeTokens.isEmpty()) {
@@ -257,6 +262,158 @@ public class LoginServiceImpl implements LoginService {
 
 		log.info(LogUtil.exitLog(CLASSNAME));
 		return responseMap;
+	}
+
+	private String fetchAndSetLoggedInUserIdAndLoginId(Map<String, Object> oauthReturnMap, String loggedInEmpId)
+			throws TechnicalException, BussinessException, ContractException {
+		EmployeeMaster employeeMaster = getLoggedInUserDTO();
+		if (employeeMaster != null) {
+			loggedInEmpId = employeeMaster.getEmpId();
+			oauthReturnMap.put("empId", loggedInEmpId);
+		}
+		return loggedInEmpId;
+	}
+
+	@Override
+	public Map<String, Object> getLoggedInUser(MultiValueMap<String, String> headers)
+			throws BussinessException, TechnicalException, ContractException {
+
+		log.info(LogUtil.startLog(CLASSNAME));
+
+		Map<String, Object> responseMap = new HashMap<>();
+		Map<String, Object> oauthReturnMap = new HashMap<>();
+		String loggedInEmpId = null;
+
+		try {
+			String token = extractBearerToken(headers);
+			validateToken(token);
+
+			loggedInEmpId = fetchAndSetLoggedInUserIdAndLoginId(oauthReturnMap, loggedInEmpId);
+
+			validateUserIdFromToken(oauthReturnMap, loggedInEmpId);
+
+			log.info("OAuth Map: {}", oauthReturnMap);
+			log.info("Logged in Employee ID: {}", loggedInEmpId);
+
+			EmployeeMaster employeeMaster = employeeMasterRepository.findByEmpId(loggedInEmpId);
+
+			if (employeeMaster != null) {
+
+				responseMap.put("empId", employeeMaster.getEmpId());
+				responseMap.put("empName", employeeMaster.getEmpName());
+				responseMap.put("email", employeeMaster.getEmailId());
+
+			} else {
+				throw new BussinessException(HttpStatus.UNAUTHORIZED, "Employee not found for given ID.");
+			}
+
+		} catch (BussinessException | ContractException e) {
+			throw e;
+		} catch (Exception e) {
+			log.error(LogUtil.errorLog(e));
+			throw new TechnicalException(HttpStatus.INTERNAL_SERVER_ERROR, Constants.TECHNICAL_ERROR);
+		}
+
+		log.info(LogUtil.exitLog(CLASSNAME));
+		return responseMap;
+	}
+
+	private String extractBearerToken(MultiValueMap<String, String> headers) {
+
+		if (headers == null || !headers.containsKey(Constants.AUTHORIZATION)) {
+			throw new IllegalArgumentException("Authorization header is missing.");
+		}
+
+		List<String> authHeaders = headers.get(Constants.AUTHORIZATION);
+		if (authHeaders == null || authHeaders.isEmpty()) {
+			throw new IllegalArgumentException("Authorization header is empty.");
+		}
+
+		String authHeader = authHeaders.get(0);
+		if (!authHeader.startsWith("Bearer ")) {
+			throw new IllegalArgumentException("Invalid Authorization header format.");
+		}
+
+		return authHeader.substring(7);
+	}
+
+	private void validateToken(String token) throws BussinessException {
+		if (jwtService.isTokenBlacklisted(token)) {
+			throw new BussinessException(HttpStatus.UNAUTHORIZED, "Invalid access token: Token is blacklisted");
+		}
+	}
+
+	private void validateUserIdFromToken(Map<String, Object> oauthReturnMap, String loggedInEmpId)
+			throws BussinessException {
+		if (MapUtils.isEmpty(oauthReturnMap) || !oauthReturnMap.containsKey(Constants.ID)) {
+			throw new BussinessException(HttpStatus.UNAUTHORIZED, "Invalid access token: ID not found");
+		}
+
+		Object idObject = oauthReturnMap.get(Constants.ID);
+		if (idObject == null) {
+			throw new BussinessException(HttpStatus.UNAUTHORIZED, "Invalid access token: ID is null");
+		}
+
+		String idStr = idObject.toString().trim();
+		if (idStr.isEmpty() || "null".equalsIgnoreCase(idStr)) {
+			throw new BussinessException(HttpStatus.UNAUTHORIZED, "Invalid access token: ID is empty or 'null'");
+		}
+
+		try {
+			Long.parseLong(idStr);
+		} catch (NumberFormatException e) {
+			throw new BussinessException(HttpStatus.UNAUTHORIZED, "Invalid access token: Unable to parse ID");
+		}
+	}
+
+	@Override
+	public EmployeeMasterDTO castToUDTO(EmployeeMaster employeeMaster) {
+		log.info(LogUtil.startLog(CLASSNAME));
+		EmployeeMasterDTO employeeMasterDTO = new EmployeeMasterDTO();
+		employeeMasterDTO.setEmpId(employeeMaster.getEmpId());
+//		employeeMasterDTO.setLoginId(employeeMaster.getLoginId());
+		return employeeMasterDTO;
+	}
+
+	@Override
+	public EmployeeMaster getLoggedInUserDTO() throws ContractException, TechnicalException, BussinessException {
+		log.info(LogUtil.startLog(CLASSNAME));
+		EmployeeMaster employee = null;
+		EmployeeMaster defaultEmployee = new EmployeeMaster();
+
+		try {
+			UsernamePasswordAuthenticationToken authentication = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+					.getContext().getAuthentication();
+
+			Object principal = authentication.getPrincipal();
+
+			String empId = ((CustomUserDetails) principal).getUsername();
+
+			// Validate token using empId and loggedIn=true
+			Optional<UserToken> optionalToken = userTokenRepository.findByEmpIdAndLoggedIn(empId, Boolean.TRUE);
+
+			if (optionalToken.isEmpty()) {
+				throw new BussinessException(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED, "User not authenticated");
+			}
+
+			if (empId != null) {
+				employee = employeeMasterRepository.findByEmpId(empId);
+			}
+
+		} catch (Exception e) {
+			log.error("Error retrieving logged-in employee from Security Context", e);
+		}
+
+		if (employee == null && defaultEmployee != null) {
+			employee = defaultEmployee;
+		}
+
+		if (employee != null && employee.getEmpId() != null) {
+			log.info("Employee EmpId: " + employee.getEmpId());
+		}
+
+		log.info(LogUtil.exitLog(CLASSNAME));
+		return employee;
 	}
 
 }

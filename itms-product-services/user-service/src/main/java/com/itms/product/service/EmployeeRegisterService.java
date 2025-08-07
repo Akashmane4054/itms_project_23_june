@@ -15,8 +15,17 @@ public interface EmployeeRegisterService {
 
 	Map<String, Object> registerUser(RegisterMasterDTO registerMasterDTO)
 			throws BussinessException, TechnicalException, ContractException;
-	
-	Map<String, Object> getModuleCodeByteamName(String teamName) 
+
+	Map<String, Object> getModuleCodeByteamName(String teamName)
+			throws BussinessException, TechnicalException, ContractException;
+
+	Map<String, Object> findVhIdByModuleCode(Integer moduleCode)
+			throws BussinessException, TechnicalException, ContractException;
+
+	Map<String, Object> findTlIdByModuleCode(Integer moduleCode)
+			throws BussinessException, TechnicalException, ContractException;
+
+	Map<String, Object> findSpocTlByEmpId(String empId)
 			throws BussinessException, TechnicalException, ContractException;
 
 }

@@ -71,8 +71,13 @@ public class Constants {
 	public static final String DOT = ".";
 
 	public static final String HYPEN = "-";
-	
+
 	public static final String RESPONSE = "response";
 
+	public static final String USER_SERVICE = "/user-service/";
+
+	public static final String AUTHORIZATION = "Authorization";
+
+	public static final String ID = "id";
 
 }
