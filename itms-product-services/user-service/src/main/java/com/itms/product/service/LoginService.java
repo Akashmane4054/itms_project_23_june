@@ -2,6 +2,7 @@ package com.itms.product.service;
 
 import java.util.Map;
 
+import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 
 import com.itms.core.exception.BussinessException;
@@ -10,6 +11,7 @@ import com.itms.core.exception.TechnicalException;
 import com.itms.product.domain.EmployeeMaster;
 import com.itms.product.dto.EmployeeMasterDTO;
 
+@Service
 public interface LoginService {
 
 	Map<String, Object> loginWithLoginId(EmployeeMasterDTO employeeMasterDto)

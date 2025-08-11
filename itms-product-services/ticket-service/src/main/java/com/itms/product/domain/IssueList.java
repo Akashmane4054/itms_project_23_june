@@ -13,7 +13,7 @@ public class IssueList {
 
 	@Id
 	@Column(name = "TEAM_CODE", length = 20)
-	private String teamCode;
+	private Integer teamCode;
 
 	@Column(name = "TEAM_NAME", nullable = false, length = 30)
 	private String teamName;

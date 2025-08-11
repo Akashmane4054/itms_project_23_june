@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import com.itms.product.domain.IssueList;
 
 @Repository
-public interface IssueListRepository extends JpaRepository<IssueList, String> {
+public interface IssueListRepository extends JpaRepository<IssueList, Integer> {
 
 	Optional<IssueList> findByTeamNameAndIssue(String teamName, String issue);
 

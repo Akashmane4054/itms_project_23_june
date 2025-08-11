@@ -60,11 +60,20 @@ public interface EmployeeMasterRepository extends JpaRepository<EmployeeMaster, 
 	@Query(value = "UPDATE employee_master SET LAST_LOGIN = NOW(), LOGGED_IN = 'true' WHERE EMP_ID = :empId", nativeQuery = true)
 	int updateLastLogin(@Param("empId") String empId);
 
-	@Query("SELECT e.empId FROM employee_master e WHERE e.roleId = 20 AND e.moduleCode = :moduleCode")
-	String findVhIdByModuleCode(Integer moduleCode);
+//	@Query("SELECT e.empId FROM employee_master e WHERE e.roleId = 20 AND e.moduleCode = :moduleCode")
+//	String findVhIdByModuleCode(Integer moduleCode);
+//
+//	@Query("SELECT e.empId FROM employee_master e WHERE e.roleId = 3 AND e.moduleCode = :moduleCode")
+//	String findTlIdByModuleCode(Integer moduleCode);
+//	
+//	
+	
+	@Query("SELECT e.empId FROM EmployeeMaster e WHERE e.roleId = 20 AND e.moduleCode = :moduleCode")
+	String findVhIdByModuleCode(@Param("moduleCode") Integer moduleCode);
 
-	@Query("SELECT e.empId FROM employee_master e WHERE e.roleId = 3 AND e.moduleCode = :moduleCode")
-	String findTlIdByModuleCode(Integer moduleCode);
+	@Query("SELECT e.empId FROM EmployeeMaster e WHERE e.roleId = 3 AND e.moduleCode = :moduleCode")
+	String findTlIdByModuleCode(@Param("moduleCode") Integer moduleCode);
+
 
 	@Query("SELECT e.predecessor FROM EmployeeMaster e WHERE e.empId = :empId")
 	String findPredecessorByEmpId(@Param("empId") String empId);

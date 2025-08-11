@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +28,10 @@ import com.itms.product.domain.EmployeeMaster;
 import com.itms.product.domain.UserToken;
 import com.itms.product.dto.EmployeeMasterDTO;
 import com.itms.product.filter.CustomUserDetails;
+import com.itms.product.filter.JwtService;
 import com.itms.product.repository.EmployeeMasterRepository;
 import com.itms.product.repository.RegisterMasterRepository;
 import com.itms.product.repository.UserTokenRepository;
-import com.itms.product.service.JwtService;
 import com.itms.product.service.LoginService;
 
 import jakarta.transaction.Transactional;
@@ -390,9 +389,9 @@ public class LoginServiceImpl implements LoginService {
 			String empId = ((CustomUserDetails) principal).getUsername();
 
 			// Validate token using empId and loggedIn=true
-			Optional<UserToken> optionalToken = userTokenRepository.findByEmpIdAndLoggedIn(empId, Boolean.TRUE);
+			UserToken optionalToken = userTokenRepository.findByEmpIdAndLoggedIn(empId, Boolean.TRUE);
 
-			if (optionalToken.isEmpty()) {
+			if (optionalToken == null) {
 				throw new BussinessException(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED, "User not authenticated");
 			}
 
