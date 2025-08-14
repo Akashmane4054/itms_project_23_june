@@ -1,10 +1,10 @@
 spring:
   application:
-    name: Ticket-service
+    name: ticket-service
   profiles:
     active: main
   jmx:
-    default-domain: Ticket-service
+    default-domain: ticket-service
 
 ---
 spring:
@@ -14,8 +14,8 @@ spring:
   cloud:
     config:
       uri: http://localhost:9001/config-server
-
-server:
-  servlet:
-    context-path: /Ticket-service
-  port: 9021
+#
+#server:
+#  servlet:
+#    context-path: /ticket-service
+#  port: 9021

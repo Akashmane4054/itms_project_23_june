@@ -20,6 +20,13 @@ spring:
           filters:
             - StripPrefix=1
 
+        - id: TICKET-SERVICE
+          uri: lb://TICKET-SERVICE
+          predicates:
+            - Path=/ticket-service/**
+          filters:
+            - StripPrefix=1
+
       globalcors:
         corsConfigurations:
           '[/**]':

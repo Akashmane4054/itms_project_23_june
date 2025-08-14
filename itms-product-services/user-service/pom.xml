@@ -15,7 +15,7 @@
 	<artifactId>user-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>User Service</name>
-
+	<packaging>jar</packaging>
 
 	<properties>
 		<java.version>17</java.version>
@@ -76,7 +76,6 @@
 			<version>6.5.2.Final</version>
 		</dependency>
 
-
 		<!-- Hibernate Envers -->
 		<dependency>
 			<groupId>org.hibernate</groupId>
@@ -103,24 +102,24 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 		</dependency>
-
-
-		<!-- MySQL (permanently removed) -->
-		<!--
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		-->
-
 	</dependencies>
 
-
-	<dependencyManagement>
-
-	</dependencyManagement>
+	<build>
+		<plugins>
+			<!-- Spring Boot Maven Plugin -->
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>3.4.3</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>
-
-
