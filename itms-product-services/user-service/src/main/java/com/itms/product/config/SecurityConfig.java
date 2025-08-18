@@ -26,19 +26,37 @@ public class SecurityConfig {
         this.jwtAuthFilter = jwtAuthFilter;
     }
 
+   
+//    
+//    @Bean
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationProvider authProvider)
+//            throws Exception {
+//        http.csrf(csrf -> csrf.disable())
+//            .authorizeHttpRequests(auth -> auth
+//                .requestMatchers(
+//                    "/**"   
+//                ).permitAll()
+//                .requestMatchers("/auth/user/**").hasAuthority("ROLE_USER")
+//                .requestMatchers("/auth/admin/**").hasAuthority("ROLE_ADMIN")
+//                .anyRequest().authenticated()
+//            )
+//            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//            .authenticationProvider(authProvider)
+//            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+//
+//        return http.build();
+//    }
+
+    
+    
+    
+    
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationProvider authProvider)
             throws Exception {
         http.csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "addUser",
-                    "loginWithLoginId",
-                    "getLoggedInUser"
-                ).permitAll()
-                .requestMatchers("/auth/user/**").hasAuthority("ROLE_USER")
-                .requestMatchers("/auth/admin/**").hasAuthority("ROLE_ADMIN")
-                .anyRequest().authenticated()
+                .requestMatchers("/**").permitAll()   // everything open
             )
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authenticationProvider(authProvider)
@@ -47,6 +65,10 @@ public class SecurityConfig {
         return http.build();
     }
 
+    
+    
+    
+    
     @Bean
     public AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService,
                                                          PasswordEncoder passwordEncoder) {

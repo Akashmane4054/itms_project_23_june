@@ -29,6 +29,8 @@
 	<modules>
 		<module>ticket-service</module>
 		<module>user-service</module>
+		<module>meeting-service</module>
+
 	</modules>
 
 
