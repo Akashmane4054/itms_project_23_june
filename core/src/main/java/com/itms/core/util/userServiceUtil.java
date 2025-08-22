@@ -137,7 +137,7 @@ public class userServiceUtil {
 	}
 	
 	
-	public Map<String, Object> tokenVerification(MultiValueMap<String, String> headers)
+	public Map<String, Object> tokenVerification(MultiValueMap<String, Object> headers)
 			throws BussinessException, ContractException, TechnicalException {
 		log.info(LogUtil.startLog(CLASSNAME));
 		Map<String, Object> map = new HashMap<>();

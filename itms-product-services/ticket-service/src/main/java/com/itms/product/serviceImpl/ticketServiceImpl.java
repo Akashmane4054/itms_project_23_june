@@ -76,21 +76,20 @@ public class ticketServiceImpl implements ticketService {
 
 	@Autowired
 	private TicketRuleRepository ticketRuleRepository;
-	
+
 	@PersistenceContext
 	private EntityManager entityManager;
 
-
 	@Override
-	public Map<String, Object> issueTicket(TicketRequestDTO dto, MultiValueMap<String, String> headers)
+	public Map<String, Object> issueTicket(TicketRequestDTO dto, MultiValueMap<String, Object> headers)
 			throws BussinessException, TechnicalException, ContractException {
 
 		log.info("Ticket Creation: START");
 		Map<String, Object> responseMap = new HashMap<>();
 
-//		Map<String, Object> userResponse = verifyToken(headers);
-//
-//		Long empId = Long.parseLong(String.valueOf(userResponse.get("empId")));
+		Map<String, Object> userResponse = verifyToken(headers);
+
+		Long empId = Long.parseLong(String.valueOf(userResponse.get("empId")));
 
 		try {
 			// Step 1: Get bank details
@@ -232,20 +231,16 @@ public class ticketServiceImpl implements ticketService {
 		log.info("Ticket Creation: END");
 		return responseMap;
 	}
-	
-	
-	
-	
+
 	@Transactional
 	private String generateTicketNumber(String bankGroup, String bankType) {
-	    String ticketSeq = bankGroup + bankType; // e.g. CAC, NBT, RRT etc.
+		String ticketSeq = bankGroup + bankType; // e.g. CAC, NBT, RRT etc.
 
-	    String sql = "SELECT nxt_" + ticketSeq + "_issue_seq() FROM dual";
+		String sql = "SELECT nxt_" + ticketSeq + "_issue_seq() FROM dual";
 
-	    Object result = entityManager.createNativeQuery(sql).getSingleResult();
-	    return String.valueOf(result);
+		Object result = entityManager.createNativeQuery(sql).getSingleResult();
+		return String.valueOf(result);
 	}
-
 
 //	@Transactional
 //	private String generateTicketNumber(String bankGroup, String bankType) {
@@ -425,9 +420,23 @@ public class ticketServiceImpl implements ticketService {
 		return (priorityCode != null) ? priorityCode.getPriorityCode() : 0;
 	}
 
-	private Map<String, Object> verifyToken(MultiValueMap<String, String> headers)
+	private Map<String, Object> verifyToken(MultiValueMap<String, Object> headers)
 			throws BussinessException, ContractException, TechnicalException {
 		return ExceptionUtil.throwExceptionsIfPresent(userServiceUtil.tokenVerification(headers));
+	}
+
+	@Override
+	public Map<String, Object> serviceTicket(TicketRequestDTO dto, MultiValueMap<String, Object> headers)
+			throws BussinessException, TechnicalException, ContractException {
+
+		return null;
+	}
+
+	@Override
+	public Map<String, Object> changeRequestTicket(TicketRequestDTO dto, MultiValueMap<String, Object> headers)
+			throws BussinessException, TechnicalException, ContractException {
+
+		return null;
 	}
 
 }

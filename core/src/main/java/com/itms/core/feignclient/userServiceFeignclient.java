@@ -36,6 +36,6 @@ public interface userServiceFeignclient {
 			throws BussinessException, ContractException, TechnicalException;
 
 	@PostMapping(EndPointReference.USER_SERVICE + EndPointReference.GET_LOGGED_IN_USER)
-	public Map<String, Object> getLoggedInUser(@RequestHeader MultiValueMap<String, String> headers);
+	public Map<String, Object> getLoggedInUser(@RequestHeader MultiValueMap<String, Object> headers);
 
 }

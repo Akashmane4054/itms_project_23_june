@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("/user-service") // 👈 only if you want prefix
 public class EmployeeRegisterController {
 
 	// addUser api

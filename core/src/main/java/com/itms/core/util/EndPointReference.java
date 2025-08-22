@@ -27,6 +27,12 @@ public final class EndPointReference {
 	public static final String GET_LOGGED_IN_USER = "getLoggedInUser";
 	
 	public static final String GET_LOGGED_IN_USER_DTO = "getLoggedInUserDto";
+	
+	public static final String SERVICE_TICKET = "serviceTicket";
+	
+	public static final String CHANGE_REQUEST_TICKET = "changeRequestTicket";
+
+
 
 
 }

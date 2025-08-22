@@ -28,10 +28,29 @@ public class ticketController {
 
 	@PostMapping(EndPointReference.ISSUE_TICKET)
 	public Map<String, Object> issueTicket(@RequestBody TicketRequestDTO dto,
-			@RequestHeader MultiValueMap<String, String> headers)
+			@RequestHeader MultiValueMap<String, Object> headers)
 			throws BussinessException, TechnicalException, ContractException {
 		log.info(LogUtil.presentationLogger(EndPointReference.ISSUE_TICKET));
 		return ticketService.issueTicket(dto,headers);
 	}
+	
+	
+	@PostMapping(EndPointReference.SERVICE_TICKET)
+	public Map<String, Object> serviceTicket(@RequestBody TicketRequestDTO dto,
+			@RequestHeader MultiValueMap<String, Object> headers)
+			throws BussinessException, TechnicalException, ContractException {
+		log.info(LogUtil.presentationLogger(EndPointReference.SERVICE_TICKET));
+		return ticketService.serviceTicket(dto,headers);
+	}
+	
+	
+	@PostMapping(EndPointReference.CHANGE_REQUEST_TICKET)
+	public Map<String, Object> changeRequestTicket(@RequestBody TicketRequestDTO dto,
+			@RequestHeader MultiValueMap<String, Object> headers)
+			throws BussinessException, TechnicalException, ContractException {
+		log.info(LogUtil.presentationLogger(EndPointReference.CHANGE_REQUEST_TICKET));
+		return ticketService.changeRequestTicket(dto,headers);
+	}
+
 
 }

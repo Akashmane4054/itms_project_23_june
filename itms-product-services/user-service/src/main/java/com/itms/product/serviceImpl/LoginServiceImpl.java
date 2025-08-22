@@ -129,13 +129,14 @@ public class LoginServiceImpl implements LoginService {
 			// 8️. Generate JWT token
 			String token = jwtService.generateToken(employee.getEmpId());
 
-			// 9️ Save new UserToken record
-			UserToken userToken = new UserToken();
+			// 9️. Save or update UserToken record
+			UserToken userToken = userTokenRepository.findTokenByEmpId(employee.getEmpId()).orElse(new UserToken());
+
 			userToken.setEmpId(employee.getEmpId());
 			userToken.setToken(token);
 			userToken.setExpiration(jwtService.getExpirationDateFromToken(token));
-
 			userToken.setLoggedIn(true);
+
 			userTokenRepository.save(userToken);
 
 			responseMap.put("success", "User Authenticated Successfully");
@@ -358,11 +359,6 @@ public class LoginServiceImpl implements LoginService {
 			throw new BussinessException(HttpStatus.UNAUTHORIZED, "Invalid access token: ID is empty or 'null'");
 		}
 
-		try {
-			Long.parseLong(idStr);
-		} catch (NumberFormatException e) {
-			throw new BussinessException(HttpStatus.UNAUTHORIZED, "Invalid access token: Unable to parse ID");
-		}
 	}
 
 	@Override
@@ -386,7 +382,14 @@ public class LoginServiceImpl implements LoginService {
 
 			Object principal = authentication.getPrincipal();
 
-			String empId = ((CustomUserDetails) principal).getUsername();
+			String empId;
+			if (principal instanceof org.springframework.security.core.userdetails.User user) {
+				empId = user.getUsername();
+			} else if (principal instanceof CustomUserDetails customUser) {
+				empId = customUser.getUsername();
+			} else {
+				throw new IllegalStateException("Unexpected principal type: " + principal.getClass());
+			}
 
 			// Validate token using empId and loggedIn=true
 			UserToken optionalToken = userTokenRepository.findByEmpIdAndLoggedIn(empId, Boolean.TRUE);

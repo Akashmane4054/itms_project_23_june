@@ -67,13 +67,12 @@ public interface EmployeeMasterRepository extends JpaRepository<EmployeeMaster, 
 //	String findTlIdByModuleCode(Integer moduleCode);
 //	
 //	
-	
+
 	@Query("SELECT e.empId FROM EmployeeMaster e WHERE e.roleId = 20 AND e.moduleCode = :moduleCode")
 	String findVhIdByModuleCode(@Param("moduleCode") Integer moduleCode);
 
 	@Query("SELECT e.empId FROM EmployeeMaster e WHERE e.roleId = 3 AND e.moduleCode = :moduleCode")
 	String findTlIdByModuleCode(@Param("moduleCode") Integer moduleCode);
-
 
 	@Query("SELECT e.predecessor FROM EmployeeMaster e WHERE e.empId = :empId")
 	String findPredecessorByEmpId(@Param("empId") String empId);

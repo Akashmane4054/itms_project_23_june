@@ -11,7 +11,14 @@ import com.itms.product.dto.TicketRequestDTO;
 
 public interface ticketService {
 
-	Map<String, Object> issueTicket(TicketRequestDTO dto, MultiValueMap<String, String> headers)
+	Map<String, Object> issueTicket(TicketRequestDTO dto, MultiValueMap<String, Object> headers)
+			throws BussinessException, TechnicalException, ContractException;
+
+	
+	Map<String, Object> serviceTicket(TicketRequestDTO dto, MultiValueMap<String, Object> headers)
+			throws BussinessException, TechnicalException, ContractException;
+	
+	Map<String, Object> changeRequestTicket(TicketRequestDTO dto, MultiValueMap<String, Object> headers)
 			throws BussinessException, TechnicalException, ContractException;
 
 }

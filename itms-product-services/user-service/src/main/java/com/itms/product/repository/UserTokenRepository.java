@@ -1,6 +1,7 @@
 package com.itms.product.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -15,7 +16,7 @@ import jakarta.transaction.Transactional;
 @Repository
 public interface UserTokenRepository extends JpaRepository<UserToken, String> {
 
-	List<UserToken> findTokensByEmpId(String empId);
+	Optional<UserToken> findTokenByEmpId(String empId);
 
 	@Query("SELECT u FROM UserToken u WHERE u.empId = :empId AND u.loggedIn = true AND u.expiration > CURRENT_TIMESTAMP")
 	List<UserToken> findByEmpIdAndLoggedInTrue(@Param("empId") String empId);

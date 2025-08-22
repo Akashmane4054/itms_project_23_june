@@ -45,7 +45,7 @@ public class userServiceFallback implements userServiceFeignclient {
 	}
 
 	@Override
-	public Map<String, Object> getLoggedInUser(MultiValueMap<String, String> headers) {
+	public Map<String, Object> getLoggedInUser(MultiValueMap<String, Object> headers) {
 		// TODO Auto-generated method stub
 		return null;
 	}

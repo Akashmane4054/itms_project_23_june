@@ -76,8 +76,8 @@ public class Constants {
 
 	public static final String USER_SERVICE = "/user-service/";
 
-	public static final String AUTHORIZATION = "Authorization";
+	public static final String AUTHORIZATION = "authorization";
 
-	public static final String ID = "id";
+	public static final String ID = "empId";
 
 }

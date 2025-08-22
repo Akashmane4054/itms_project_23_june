@@ -16,7 +16,6 @@ import lombok.NoArgsConstructor;
 public class RoleMaster {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "ROLE_ID")
 	private Integer roleId;
 
