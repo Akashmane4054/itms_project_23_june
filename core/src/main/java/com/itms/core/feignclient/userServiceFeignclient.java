@@ -35,7 +35,7 @@ public interface userServiceFeignclient {
 	public Map<String, Object> findSpocTlByEmpId(@RequestParam("empId") String empId)
 			throws BussinessException, ContractException, TechnicalException;
 
-	@PostMapping(EndPointReference.USER_SERVICE + EndPointReference.GET_LOGGED_IN_USER)
+	@PostMapping(EndPointReference.GET_LOGGED_IN_USER)
 	public Map<String, Object> getLoggedInUser(@RequestHeader MultiValueMap<String, Object> headers);
 
 }

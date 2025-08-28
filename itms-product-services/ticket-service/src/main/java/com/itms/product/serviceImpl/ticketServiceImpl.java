@@ -3,8 +3,14 @@ package com.itms.product.serviceImpl;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.DayOfWeek;
+import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -26,7 +32,9 @@ import com.itms.product.domain.CallMaster;
 import com.itms.product.domain.IssueList;
 import com.itms.product.domain.PriorityCode;
 import com.itms.product.domain.UploadFile;
-import com.itms.product.dto.TicketRequestDTO;
+import com.itms.product.dto.CrTicketDTO;
+import com.itms.product.dto.IssueTicketRequestDTO;
+import com.itms.product.dto.ServiceTicketDTO;
 import com.itms.product.repository.BankDetailsRepository;
 import com.itms.product.repository.CallHistoryRepository;
 import com.itms.product.repository.CallMasterRepository;
@@ -81,15 +89,13 @@ public class ticketServiceImpl implements ticketService {
 	private EntityManager entityManager;
 
 	@Override
-	public Map<String, Object> issueTicket(TicketRequestDTO dto, MultiValueMap<String, Object> headers)
+	public Map<String, Object> issueTicket(IssueTicketRequestDTO dto, MultiValueMap<String, Object> headers)
 			throws BussinessException, TechnicalException, ContractException {
 
 		log.info("Ticket Creation: START");
 		Map<String, Object> responseMap = new HashMap<>();
 
 		Map<String, Object> userResponse = verifyToken(headers);
-
-		Long empId = Long.parseLong(String.valueOf(userResponse.get("empId")));
 
 		try {
 			// Step 1: Get bank details
@@ -325,7 +331,7 @@ public class ticketServiceImpl implements ticketService {
 		return filename != null && filename.contains(".") ? filename.substring(filename.lastIndexOf('.') + 1) : "";
 	}
 
-	private void handleFileUploads(TicketRequestDTO dto, String ticketId) throws IOException, SQLException {
+	private void handleFileUploads(IssueTicketRequestDTO dto, String ticketId) throws IOException, SQLException {
 		MultipartFile brdFile = dto.getBrdBusinessFile();
 		MultipartFile circularFile = dto.getCircularUploadFile();
 
@@ -338,7 +344,8 @@ public class ticketServiceImpl implements ticketService {
 		}
 	}
 
-	private CallMaster buildCallMasterEntity(TicketRequestDTO dto, int bankCode, String ticketId) throws SQLException {
+	private CallMaster buildCallMasterEntity(IssueTicketRequestDTO dto, int bankCode, String ticketId)
+			throws SQLException {
 		CallMaster callMaster = new CallMaster();
 
 		callMaster.setCallNo(ticketId);
@@ -373,7 +380,7 @@ public class ticketServiceImpl implements ticketService {
 		return callMaster;
 	}
 
-	private CallHistoryMaster buildCallHistoryEntity(TicketRequestDTO dto, String ticketId, int moduleCode,
+	private CallHistoryMaster buildCallHistoryEntity(IssueTicketRequestDTO dto, String ticketId, int moduleCode,
 			int callStatus, String inBucketOf, String sla, int priorityCode) {
 		CallHistoryMaster history = new CallHistoryMaster();
 
@@ -426,14 +433,452 @@ public class ticketServiceImpl implements ticketService {
 	}
 
 	@Override
-	public Map<String, Object> serviceTicket(TicketRequestDTO dto, MultiValueMap<String, Object> headers)
+	public Map<String, Object> serviceTicket(ServiceTicketDTO dto, MultiValueMap<String, Object> headers)
 			throws BussinessException, TechnicalException, ContractException {
 
-		return null;
+		log.info("Ticket Creation: START");
+		Map<String, Object> responseMap = new HashMap<>();
+
+		Map<String, Object> userResponse = verifyToken(headers);
+
+		String usrId = (String) userResponse.get("userId");
+		String usrName = (String) userResponse.get("userName");
+		String userTeam = (String) userResponse.get("userTeam");
+		int userRole = (int) userResponse.get("userRole");
+		int stateCode = (int) userResponse.get("stateCode");
+
+		try {
+			// Step 1: Get bank details
+			BankDetails bankDetails = bankDetailsRepository.findByBankName(dto.getBankname());
+
+			// Step 2: Generate Unique Ticket ID
+			String ticketId = generateTicketNumber(bankDetails.getBankGroup(), "S");
+
+			// Step 3: Get required codes
+			int moduleCode = userServiceUtil.getModuleCodeByTeamName(dto.getAssigntoCRE());
+			int bankCode = bankDetails.getBankCode();
+
+			PriorityCode priority = priorityCodeRepository.findByPriorityLevel(dto.getPriority());
+			int priorityCode = priority.getPriorityCode();
+
+			String vhId = userServiceUtil.findVhIdByModuleCode(moduleCode);
+
+			String inBucketOf = (vhId != null && !vhId.isEmpty()) ? vhId
+					: userServiceUtil.findTlIdByModuleCode(moduleCode);
+
+//			// Step 4: Upload BRD/Circular Files (if any)
+//			handleFileUploads(dto, ticketId);
+//			
+			// Step 4: File Upload (return attachmentId if needed)
+			String attachmentId = handleFileUploads(dto, ticketId);
+			if (attachmentId == null)
+				attachmentId = "0";
+
+			// Step 5: Evaluate SLA
+			String sla = (dto.getSla() == null || dto.getSla().trim().isEmpty())
+					? issueListRepository.findSlaByTeamAndIssue(dto.getAssigntoCRE(), dto.getIssueDescription())
+					: dto.getSla().trim();
+
+			// 🔹 CloneRefId logic
+			String cloneRefId = (dto.getCloneRefId() == null || dto.getCloneRefId().isEmpty()) ? "--"
+					: dto.getCloneRefId();
+			if (cloneRefId.equals("--") && sla != null && sla.length() >= 2) {
+				sla = sla.substring(0, 2);
+			}
+
+			// 🔹 CIF issue description cleanup
+			String issueDescription = dto.getIssueDescription();
+			if ("CIF opening".equalsIgnoreCase(issueDescription)) {
+				issueDescription = issueDescription.replaceAll("Â", "");
+			}
+
+			// 🔹 SLA Test validation (fallback SLA calc)
+			if ("(".equalsIgnoreCase(sla)) {
+				try {
+					sla = issueListRepository.findSlaByTeamAndIssue(dto.getAssigntoCRE(), issueDescription);
+				} catch (Exception ex) {
+					log.error("Fallback SLA fetch failed", ex);
+				}
+			}
+
+			// 🔹 Radio button logic (from JSP)
+			String rdoNew = dto.getRdoNew();
+			String radioBtn = (rdoNew == null || rdoNew.isEmpty()) ? "NA" : rdoNew;
+
+			String notify = "accept";
+			int callStatus = 6;
+			Timestamp expTimeTimestamp = null;
+
+			try {
+				if (sla == null || sla.isEmpty()) {
+					sla = issueListRepository.findSlaByTeamAndIssue(dto.getAssigntoCRE(), issueDescription);
+
+				}
+
+				if ("NA".equalsIgnoreCase(sla)) {
+
+					String flag24hours = issueListRepository.findFlag24hours(dto.getAssigntoCRE(), issueDescription);
+
+					if ("N".equalsIgnoreCase(flag24hours)) {
+
+						String slaTimeForNA = issueListRepository.findSlaTime(dto.getAssigntoCRE(), issueDescription);
+
+						Date newTimelineSla = calculateTimeline(slaTimeForNA, new Date(), flag24hours);
+						expTimeTimestamp = new Timestamp(newTimelineSla.getTime());
+					} else {
+
+						String slaTimeForNA = issueListRepository.findSlaTime(dto.getAssigntoCRE(), issueDescription);
+
+						int slaMinutes = Integer.parseInt(slaTimeForNA) * 60;
+						expTimeTimestamp = Timestamp.valueOf(LocalDateTime.now().plusMinutes(slaMinutes));
+					}
+				} else {
+					Integer slaTime = slaMasterRepository.findSlaTimeBySlaId(sla);
+					int slaMinutes = (slaTime != null ? slaTime : 0) * 60;
+					expTimeTimestamp = Timestamp.valueOf(LocalDateTime.now().plusMinutes(slaMinutes));
+				}
+			} catch (Exception e) {
+				log.error("SLA calculation failed", e);
+				throw new TechnicalException(HttpStatus.INTERNAL_SERVER_ERROR, "SLA calculation failed");
+			}
+
+			// Step 6: Rule Bucket check
+			Optional<String> optionalRuleBkt = ticketRuleRepository.findEmpIdByRule(moduleCode,
+					bankDetails.getBankGroup(), issueDescription);
+			String ruleBkt = optionalRuleBkt.orElseGet(() -> ticketRuleRepository
+					.findEmpIdByOldIssueMapping(moduleCode, bankDetails.getBankGroup(), issueDescription).orElse(""));
+
+			if (!ruleBkt.isEmpty()) {
+				inBucketOf = ruleBkt;
+			}
+
+			// Step 7: ReviewTicket logic
+			if ("reviewticket".equalsIgnoreCase(dto.getReviewTicket())) {
+				String tlId = userServiceUtil.findTlIdByModuleCode(Integer.parseInt(userTeam));
+				if (tlId != null && !tlId.isEmpty()) {
+					inBucketOf = tlId;
+				}
+			}
+
+			// Step 8: SPOC/Banker logic
+			if (userRole == 14 || userRole == 13) {
+				String spocTL = userServiceUtil.findSpocTlByEmpId(usrId);
+				if (spocTL != null && !spocTL.isEmpty()) {
+					inBucketOf = spocTL;
+				}
+			}
+
+			// Step 9: Direct SPOC assign & Helpdesk routing
+			boolean checkSpocDirectAssign = ticketRuleRepository.checkSpocDirectAssign(moduleCode, "Service");
+			if ((userRole == 7 || userRole == 16) && checkSpocDirectAssign) {
+				inBucketOf = userServiceUtil.findTlIdByModuleCode(moduleCode);
+			} else if ((userRole == 7 || userRole == 16) && (stateCode != 24)) {
+				inBucketOf = userServiceUtil.findTlIdByModuleCode(33); // Helpdesk
+				moduleCode = 33;
+			}
+
+			// Step 10: OwnTeam case
+			if ("ownTeam".equalsIgnoreCase(dto.getAssigntoCRE())) {
+				moduleCode = Integer.parseInt(userTeam);
+				inBucketOf = usrId;
+				callStatus = 6;
+				notify = "accept";
+			}
+
+			// Step 11: Save CallMaster
+			CallMaster callMaster = buildCallMasterEntity(dto, bankCode, ticketId);
+			callMaster.setCallStatusCode(callStatus);
+			callMaster.setSlaLevel(sla);
+			callMaster.setNotification(notify);
+			callMaster.setCallAssignedModuleCode(moduleCode);
+			callMaster.setInBucketOf(inBucketOf);
+			callMaster.setExpectedTime(expTimeTimestamp);
+			callMaster.setAttachmentId(attachmentId);
+			callMaster.setRadioBtn(radioBtn); // 🔹 added radio button info
+
+			callMasterRepository.save(callMaster);
+
+			// Step 12: Save CallHistory
+			CallHistoryMaster callHistory = buildCallHistoryEntity(dto, ticketId, moduleCode, callStatus, inBucketOf,
+					sla, priorityCode);
+			callHistory.setAttachmentId(attachmentId);
+			callHistory.setRadioBtn(radioBtn); // 🔹 track in history also
+			callHistoryRepository.save(callHistory);
+
+			responseMap.put("ticketId", ticketId);
+			responseMap.put("message", "Ticket created successfully");
+
+		} catch (Exception ex) {
+			log.error("Ticket creation failed", ex);
+			throw new TechnicalException(HttpStatus.INTERNAL_SERVER_ERROR, "Ticket creation failed");
+		}
+
+		log.info("Ticket Creation: END");
+		return responseMap;
+	}
+
+	public Date calculateTimeline(String tat, Date acceptDate, String flag24Hours) {
+		// Handle half-hour case (0.5 → 1 hour)
+		if (Float.parseFloat(tat) == 0.5) {
+			tat = "1";
+		}
+
+		long tatLong = Long.parseLong(tat);
+
+		// Convert Date → LocalDateTime
+		LocalDateTime acceptDateTime = acceptDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+		LocalDateTime newTimeline;
+
+		// Case 1: TAT in days (multiples of 8 hrs)
+		long newTatDays = tatLong / 8;
+		if (newTatDays > 0) {
+			newTimeline = excludingSundays(acceptDateTime, newTatDays);
+		} else {
+			// Case 2: Less than 1 day TAT → adjust with working hours
+			int tatHours = Integer.parseInt(tat);
+			newTimeline = workingHoursTat(acceptDateTime, tatHours);
+		}
+
+		// Case 3: Special 9-hour flag
+		if (!tat.equals("1")) {
+			newTimeline = getTimeline9Hrs(tat, acceptDateTime, flag24Hours);
+		}
+
+		// Convert back LocalDateTime → Date (if needed)
+		return Date.from(newTimeline.atZone(ZoneId.systemDefault()).toInstant());
+	}
+
+	/**
+	 * Add given days to start time, skipping Sundays.
+	 */
+	public LocalDateTime excludingSundays(LocalDateTime startDateTime, long days) {
+		LocalDateTime result = startDateTime;
+
+		for (int i = 0; i < days; i++) {
+			result = result.plusDays(1);
+			if (result.getDayOfWeek() == DayOfWeek.SUNDAY) {
+				result = result.plusDays(1);
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 * SLA calculation with 9-hour working rule.
+	 */
+	public static LocalDateTime getTimeline9Hrs(String TAT, LocalDateTime acceptDate, String flag24Hours) {
+		LocalDateTime newTimeLine = null;
+		boolean checkSundayAcceptDate = chedkDateIsSunday(acceptDate);
+		boolean checkSaturdayAcceptDate = chedkDateIsSaturday(acceptDate);
+		boolean checkSaturday = false;
+		boolean checkSunday = false;
+
+		LocalTime WORK_START = LocalTime.of(9, 30);
+		LocalTime WORK_END = LocalTime.of(18, 30);
+
+		// === Handle if acceptDate falls on Sunday ===
+		if (checkSundayAcceptDate && flag24Hours.equals("N")) {
+			acceptDate = acceptDate.plusDays(1).with(WORK_START);
+		}
+
+		// === Handle if acceptDate falls on Saturday ===
+		if (checkSaturdayAcceptDate && flag24Hours.equals("N")) {
+			acceptDate = acceptDate.plusDays(2).with(WORK_START); // Jump to Monday 9:30
+		}
+
+		// Define EOD and SOD for acceptDate
+		LocalDateTime EOD = LocalDateTime.of(acceptDate.toLocalDate(), WORK_END);
+		LocalDateTime SOD = LocalDateTime.of(acceptDate.toLocalDate(), WORK_START);
+
+		int minTotal = Integer.parseInt(TAT) * 60;
+		long minutes = Duration.between(acceptDate, EOD).toMinutes();
+
+		// === Case 1: acceptDate before SOD (start of day) ===
+		if (acceptDate.isBefore(SOD) || acceptDate.equals(SOD)) {
+			LocalDateTime cal = SOD;
+			int daysAdded = Integer.parseInt(TAT) / 9;
+			float hoursAdded = Float.parseFloat(TAT) - (daysAdded * 9);
+
+			if (daysAdded == 1 && hoursAdded == 0) {
+				cal = cal.plusHours(9);
+			} else if (daysAdded == 1 && hoursAdded > 0) {
+				cal = cal.plusDays(1).with(WORK_START);
+			} else {
+				if ((Integer.parseInt(TAT) % 9 == 0) && (hoursAdded == 0)) {
+					cal = addWorkDays(cal, daysAdded - 1, WORK_START);
+				} else {
+					cal = addWorkDays(cal, daysAdded, WORK_START);
+				}
+			}
+			cal = cal.plusHours((int) hoursAdded);
+
+			// Sunday/Saturday adjustment
+			if (chedkDateIsSunday(cal) && flag24Hours.equals("N")) {
+				cal = cal.plusDays(1);
+			}
+			if (chedkDateIsSaturday(cal) && flag24Hours.equals("N")) {
+				cal = cal.plusDays(2);
+			}
+
+			newTimeLine = cal;
+		}
+
+		// === Case 2: Same day completion (TAT=8 and enough time today) ===
+		else if (minutes > 480 && TAT.equals("8")) {
+			newTimeLine = acceptDate.plusHours(8);
+		}
+
+		// === Case 3: Accept date after EOD ===
+		else if (acceptDate.isAfter(EOD)) {
+			LocalDateTime cal = SOD.plusDays(1); // Next day start
+			int daysAdded = Integer.parseInt(TAT) / 9;
+			float hoursAdded = Float.parseFloat(TAT) - (daysAdded * 9);
+
+			if (daysAdded == 1 && hoursAdded == 0) {
+				cal = cal.plusDays(1).plusHours(9);
+			} else if (daysAdded == 1 && hoursAdded > 0) {
+				cal = cal.plusDays(2).with(WORK_START);
+			} else {
+				if ((Integer.parseInt(TAT) % 9 == 0) && (hoursAdded == 0)) {
+					cal = addWorkDays(cal, daysAdded - 1, WORK_START);
+				} else {
+					cal = addWorkDays(cal, daysAdded, WORK_START);
+				}
+			}
+			cal = cal.plusHours((int) hoursAdded);
+
+			// Sunday/Saturday adjustment
+			if (chedkDateIsSunday(cal) && flag24Hours.equals("N")) {
+				cal = cal.plusDays(1);
+			}
+			if (chedkDateIsSaturday(cal) && flag24Hours.equals("N")) {
+				cal = cal.plusDays(2);
+			}
+
+			newTimeLine = cal;
+		}
+
+		// === Case 4: General loop-based calculation (minutes consumption) ===
+		else {
+			LocalDateTime cal = acceptDate;
+			int minLeft = minTotal;
+
+			while (minLeft > 0) {
+				LocalDateTime dayEOD = LocalDateTime.of(cal.toLocalDate(), WORK_END);
+				LocalDateTime daySOD = LocalDateTime.of(cal.toLocalDate(), WORK_START);
+
+				long diff = Duration.between(cal, dayEOD).toMinutes();
+				if (diff > 0) {
+					if (Integer.parseInt(TAT) < 9 && diff >= minLeft) {
+						cal = cal.plusMinutes(minLeft);
+						minLeft = 0;
+					} else {
+						cal = dayEOD.plusHours(15); // Jump to next day 9:30
+						minLeft -= diff;
+					}
+				} else {
+					minLeft = 0;
+				}
+
+				// Sunday/Saturday adjustment
+				if (chedkDateIsSunday(cal) && flag24Hours.equals("N")) {
+					cal = cal.plusDays(1);
+				}
+				if (chedkDateIsSaturday(cal) && flag24Hours.equals("N")) {
+					cal = cal.plusDays(2);
+				}
+
+				newTimeLine = cal;
+			}
+		}
+
+		return newTimeLine;
+	}
+
+	/** Check if date is Sunday */
+	private static boolean chedkDateIsSunday(LocalDateTime date) {
+		return date.getDayOfWeek() == DayOfWeek.SUNDAY;
+	}
+
+	/** Check if date is Saturday */
+	private static boolean chedkDateIsSaturday(LocalDateTime date) {
+		return date.getDayOfWeek() == DayOfWeek.SATURDAY;
+	}
+
+	/**
+	 * Add working days (Mon–Fri) to a base datetime. Skips Saturday & Sunday.
+	 */
+	public static LocalDateTime addWorkDays(LocalDateTime baseDateTime, int days, LocalTime workStart) {
+		LocalDate resultDate = baseDateTime.toLocalDate();
+
+		// Adjust if starting on weekend
+		if (resultDate.getDayOfWeek() == DayOfWeek.SATURDAY) {
+			resultDate = days < 0 ? resultDate.minusDays(1) : resultDate.plusDays(2);
+		} else if (resultDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
+			resultDate = days < 0 ? resultDate.minusDays(2) : resultDate.plusDays(1);
+		}
+
+		// If days == 0, return adjusted result at workStart time
+		if (days == 0) {
+			return LocalDateTime.of(resultDate, workStart);
+		}
+
+		int absDays = Math.abs(days);
+		int direction = days > 0 ? 1 : -1;
+
+		for (int i = 0; i < absDays; i++) {
+			resultDate = resultDate.plusDays(direction);
+			// Skip weekends
+			while (resultDate.getDayOfWeek() == DayOfWeek.SATURDAY || resultDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
+				resultDate = resultDate.plusDays(direction);
+			}
+		}
+
+		return LocalDateTime.of(resultDate, workStart);
+	}
+
+	/**
+	 * Adjusts SLA considering working hours (9:30 AM – 6:30 PM), skipping Sundays.
+	 */
+	public LocalDateTime workingHoursTat(LocalDateTime startTime, int tatHours) {
+		LocalTime WORK_START = LocalTime.of(9, 30);
+		LocalTime WORK_END = LocalTime.of(18, 30);
+
+		LocalDateTime expectedTime;
+
+		// Case 1: Before working hours → start from today's 9:30 AM
+		if (startTime.toLocalTime().isBefore(WORK_START)) {
+			startTime = LocalDateTime.of(startTime.toLocalDate(), WORK_START);
+		}
+
+		// Case 2: After working hours → start from next day's 9:30 AM
+		if (startTime.toLocalTime().isAfter(WORK_END)) {
+			LocalDate nextDay = startTime.plusDays(1).toLocalDate();
+			startTime = LocalDateTime.of(nextDay, WORK_START);
+		}
+
+		// Add TAT hours
+		expectedTime = startTime.plusHours(tatHours);
+
+		// Case 3: If expected time crosses end of day → move overflow to next day
+		if (expectedTime.toLocalTime().isAfter(WORK_END)) {
+			long extraMinutes = Duration.between(WORK_END, expectedTime.toLocalTime()).toMinutes();
+			LocalDate nextDay = expectedTime.toLocalDate().plusDays(1);
+			expectedTime = LocalDateTime.of(nextDay, WORK_START).plusMinutes(extraMinutes);
+		}
+
+		// Case 4: If result falls on Sunday → shift to Monday 9:30 AM
+		if (expectedTime.getDayOfWeek() == DayOfWeek.SUNDAY) {
+			expectedTime = LocalDateTime.of(expectedTime.toLocalDate().plusDays(1), WORK_START);
+		}
+
+		return expectedTime;
 	}
 
 	@Override
-	public Map<String, Object> changeRequestTicket(TicketRequestDTO dto, MultiValueMap<String, Object> headers)
+	public Map<String, Object> changeRequestTicket(CrTicketDTO dto, MultiValueMap<String, Object> headers)
 			throws BussinessException, TechnicalException, ContractException {
 
 		return null;

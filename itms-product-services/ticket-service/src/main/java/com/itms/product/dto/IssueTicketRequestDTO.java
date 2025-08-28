@@ -5,7 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.Data;
 
 @Data
-public class TicketRequestDTO {
+public class IssueTicketRequestDTO {
 	private String bankRegion;
 	private String regBody;
 	private String circularId;

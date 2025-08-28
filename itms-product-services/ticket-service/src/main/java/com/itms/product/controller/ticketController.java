@@ -14,7 +14,9 @@ import com.itms.core.exception.ContractException;
 import com.itms.core.exception.TechnicalException;
 import com.itms.core.util.EndPointReference;
 import com.itms.core.util.LogUtil;
-import com.itms.product.dto.TicketRequestDTO;
+import com.itms.product.dto.CrTicketDTO;
+import com.itms.product.dto.IssueTicketRequestDTO;
+import com.itms.product.dto.ServiceTicketDTO;
 import com.itms.product.service.ticketService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -27,30 +29,27 @@ public class ticketController {
 	private ticketService ticketService;
 
 	@PostMapping(EndPointReference.ISSUE_TICKET)
-	public Map<String, Object> issueTicket(@RequestBody TicketRequestDTO dto,
+	public Map<String, Object> issueTicket(@RequestBody IssueTicketRequestDTO dto,
 			@RequestHeader MultiValueMap<String, Object> headers)
 			throws BussinessException, TechnicalException, ContractException {
 		log.info(LogUtil.presentationLogger(EndPointReference.ISSUE_TICKET));
-		return ticketService.issueTicket(dto,headers);
+		return ticketService.issueTicket(dto, headers);
 	}
-	
-	
+
 	@PostMapping(EndPointReference.SERVICE_TICKET)
-	public Map<String, Object> serviceTicket(@RequestBody TicketRequestDTO dto,
+	public Map<String, Object> serviceTicket(@RequestBody ServiceTicketDTO dto,
 			@RequestHeader MultiValueMap<String, Object> headers)
 			throws BussinessException, TechnicalException, ContractException {
 		log.info(LogUtil.presentationLogger(EndPointReference.SERVICE_TICKET));
-		return ticketService.serviceTicket(dto,headers);
+		return ticketService.serviceTicket(dto, headers);
 	}
-	
-	
+
 	@PostMapping(EndPointReference.CHANGE_REQUEST_TICKET)
-	public Map<String, Object> changeRequestTicket(@RequestBody TicketRequestDTO dto,
+	public Map<String, Object> changeRequestTicket(@RequestBody CrTicketDTO dto,
 			@RequestHeader MultiValueMap<String, Object> headers)
 			throws BussinessException, TechnicalException, ContractException {
 		log.info(LogUtil.presentationLogger(EndPointReference.CHANGE_REQUEST_TICKET));
-		return ticketService.changeRequestTicket(dto,headers);
+		return ticketService.changeRequestTicket(dto, headers);
 	}
-
 
 }

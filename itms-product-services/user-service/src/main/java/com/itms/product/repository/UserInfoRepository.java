@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 import com.itms.product.domain.UserInfo;
 
 @Repository
-public interface UserInfoRepository extends JpaRepository<UserInfo, Integer> {
+public interface UserInfoRepository extends JpaRepository<UserInfo, String> {
     Optional<UserInfo> findByEmail(String email); // Use 'email' if that is the correct field for login
 }
